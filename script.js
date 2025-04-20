@@ -30,25 +30,26 @@ window.addEventListener('DOMContentLoaded', () => {
 function initSession() {
     const sel = document.getElementById('session-select');
   
-    // 1) URL ごとに最新の日付とラベルを保持するマップを作成
-    const sessionsMap = allSongs.reduce((acc, song) => {
-      const url   = song['配信URL'];
-      const dateStr = song['日付']; // 例："2020/6/2"
-      const label = `${song['日付']} ｜ ${song['配信タイトル']}`;
-      const dt    = new Date(dateStr);  // YYYY/M/D 形式ならこれでOK
-      // マップにない or より新しい日付なら更新
+    // ① publicSongs: 「公開」フラグがあるものだけ
+    const publicSongs = allSongs.filter(s => s['公開'] === '公開');
+  
+    // ② セッションごとに最新の日付とラベルを保持するマップ
+    const sessionsMap = publicSongs.reduce((acc, song) => {
+      const url      = song['配信URL'];
+      const label    = `${song['日付']} ｜ ${song['配信タイトル']}`;
+      const dt       = new Date(song['日付']);
       if (!acc[url] || dt > acc[url].date) {
         acc[url] = { date: dt, label };
       }
       return acc;
     }, {});
   
-    // 2) 配列に変換して、date 降順（新しい順）にソート
+    // ③ 配列化＆新しい順ソート
     const sessionsArr = Object.entries(sessionsMap)
       .map(([url, { date, label }]) => ({ url, date, label }))
       .sort((a, b) => b.date - a.date);
   
-    // 3) ドロップダウンをクリアして<option>を追加
+    // ④ ドロップダウンに反映（公開セッションのみ）
     sel.innerHTML = '<option value="">すべての配信</option>';
     sessionsArr.forEach(({ url, label }) => {
       const opt = document.createElement('option');
@@ -57,12 +58,13 @@ function initSession() {
       sel.appendChild(opt);
     });
   
-    // 4) 選択時のリスナーはそのまま
+    // ⑤ 選択時リスナー
     sel.addEventListener('change', () => {
       document.getElementById('search-input').value = '';
       applyView();
     });
   }
+  
 
 function initSort() {
   const sel = document.getElementById('sort-select');
@@ -111,7 +113,7 @@ function initCategory() {
 
 
 /**
- * 画面の状態（セッション選択／検索キーワード／ソート）に応じてビューを更新
+ * 画面の状態（セッション選択／カテゴリ／検索キーワード／ソート）に応じてビューを更新
  */
 function applyView() {
     // ① 並び替えセレクトの状態を反映
@@ -125,7 +127,7 @@ function applyView() {
     // ── モード判定 & class 切り替え ─────────────────
     const container = document.getElementById('song-list');
     if (!kw) {
-      // 検索キーワードなし＝一覧モード（セッション表示）
+      // 検索キーワードなし＝一覧モード
       container.classList.add('session-view');
     } else {
       // キーワードあり＝グループ（アコーディオン）モード
@@ -135,21 +137,35 @@ function applyView() {
   
     // ③ 全データをコピーしてフィルタ開始
     let list = [...allSongs];
+  
+    // ④ 「公開」フラグが '公開' のものだけ残す
+    list = list.filter(song => song['公開'] === '公開');
+  
+    // ⑤ 各種フィルタ
     if (sessionVal)  list = list.filter(s => s['配信URL'] === sessionVal);
     if (categoryVal) list = list.filter(s => s['Category'] === categoryVal);
     if (kw)          list = list.filter(s => (s['曲名']||'').toLowerCase().includes(kw));
   
-    // ④ ソート適用
+    // ⑥ ソート適用
     list = sortSongs(list);
   
-    // ⑤ 表示切り替え
+    // ⑦ 公開コンテンツが一件もない場合はメッセージ表示して終了
+    if (list.length === 0) {
+      container.innerHTML = `
+        <div class="alert alert-warning" role="alert">
+          公開中のコンテンツがありません。
+        </div>
+      `;
+      return;
+    }
+  
+    // ⑧ 表示切り替え
     if (kw) {
       renderGrouped(list);
     } else {
       renderBySession(list);
     }
   }
-
 
 /**
  * currentSort に応じて songs をソートして返す
