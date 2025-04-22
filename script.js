@@ -257,21 +257,48 @@ function renderGrouped(songs) {
   });
 }
 
+/**
+ * １曲分のカード要素を返す（モーダル再生対応版）
+ */
 function createCardCol(song) {
-  const title        = song['曲名'] || '（曲名なし）';
-  const date         = song['日付'] || '';
+  const title        = song['曲名']         || '（曲名なし）';
+  const date         = song['配信日']       || '';
   const sessionTitle = song['配信タイトル'] || '';
-  const note         = song['備考'] || '';
-  const timeLink     = song['リンク'] || '';
-  const origLink     = song['配信URL'] || '';
-  const thumbUrl     = song['ThumbnailURL'] || '';
+  const note         = song['備考']         || '';
+  const timeLink     = song['リンク']       || '';   // 頭出しURL（秒数付き）
+  const origLink     = song['配信URL']      || '';   // 元配信そのもの
 
+  // サムネイル（あれば）
+  const thumbUrl = song['ThumbnailURL'] || '';
   const imgWrapper = thumbUrl
     ? `<div class="card-img-wrapper">
          <img src="${thumbUrl}" alt="${title} thumbnail">
        </div>`
     : '';
 
+  // 再生スタートボタン（モーダル起動用）
+  const playBtn = timeLink
+    ? `<button
+         type="button"
+         class="btn btn-primary flex-fill play-btn"
+         data-video-url="${timeLink}"
+       >
+         曲再生スタート
+       </button>`
+    : '';
+
+  // 元配信リンク（そのまま新規タブで開く）
+  const origBtn = origLink
+    ? `<a
+         href="${origLink}"
+         target="_blank"
+         class="btn btn-secondary flex-fill"
+       >
+         元配信リンク
+       </a>`
+    : '';
+
+  // カード本体を組み立て
   const col = document.createElement('div');
   col.className = 'col-12 col-sm-6 col-md-4';
   col.innerHTML = `
@@ -284,27 +311,11 @@ function createCardCol(song) {
         </p>
         ${note ? `<p class="text-muted mb-2">${note}</p>` : ''}
         <div class="mt-auto d-flex gap-2">
-          ${timeLink
-            ? `<button
-                 type="button"
-                 class="btn btn-primary flex-fill play-btn"
-                 data-video-url="${timeLink}"
-                 data-yt-url="${origLink}"
-               >
-                 曲再生スタート
-               </button>`
-            : ''
-          }
-          ${origLink
-            ? `<a href="${origLink}" target="_blank" class="btn btn-secondary flex-fill">
-                 元配信リンク
-               </a>`
-            : ''
-          }
-          ${!timeLink && !origLink
+          ${playBtn}
+          ${origBtn}
+          ${!playBtn && !origBtn
             ? `<span class="text-secondary">情報なし</span>`
-            : ''
-          }
+            : ''}
         </div>
       </div>
     </div>
