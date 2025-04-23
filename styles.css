@@ -11,7 +11,7 @@
   /* 全体 */
   body {
     background-color: var(--bg-base);
-    color: var(--text-base);
+    color:            var(--text-base);
   }
   
   /* ボタンカラー */
@@ -44,47 +44,64 @@
     color: var(--primary-accent);
   }
   
-  /* ── フィルタバー共通設定 ── */
+  /* ── フィルタバー ── */
   .filter-bar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
+    display:       flex;
+    flex-wrap:     wrap;
+    align-items:   center;
+    gap:           0.5rem;
   }
-  .filter-bar .filter-item {
-    display: flex;
+  .filter-item {
+    display:        flex;
     flex-direction: column;
   }
-  .filter-bar .filter-item label {
+  .filter-item label {
     margin-bottom: 0.25rem;
-    font-size: 0.85rem;
+    font-size:      0.85rem;
   }
   
-  /* ── モバイル縦並び設定 ── */
-  @media (max-width: 576px) {
+  /* ── デスクトップ以上：keyword 伸長・reset 固定 ── */
+  @media (min-width: 576px) {
+    /* keyword欄だけ余白を埋める */
+    .filter-item.keyword {
+      flex:      1 1 auto;
+      min-width: 12rem;
+    }
+    /* リセットは固定幅 */
+    .filter-item.reset {
+      flex:       0 0 auto;
+      min-width:  6rem;
+      align-self: flex-end;
+    }
+    /* 他は必要最小幅 */
+    .filter-item:not(.keyword):not(.reset) select,
+    .filter-item:not(.keyword):not(.reset) input,
+    .filter-item:not(.keyword):not(.reset) button {
+      width: auto;
+    }
+  }
+  
+  /* ── モバイル：縦並び ── */
+  @media (max-width: 575.98px) {
     .filter-bar {
       flex-direction: column;
-      gap: 0.75rem;
+      gap:           0.75rem;
     }
-    .filter-bar .filter-item {
+    .filter-item {
       width: 100% !important;
     }
-    /* リセットボタン全幅に */
-    .filter-bar #reset-btn {
+    .filter-item.reset button {
       width: 100%;
     }
-  }
   
-  /* ── モバイルカード縦表示 ── */
-  @media (max-width: 576px) {
+    /* カード縦並び */
     #song-list .row {
       display: block;
     }
     #song-list .col-12,
     #song-list .col-sm-6,
     #song-list .col-md-4 {
-      width: 100% !important;
+      width:         100% !important;
       margin-bottom: 1rem;
     }
   }

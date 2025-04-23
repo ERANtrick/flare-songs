@@ -50,7 +50,7 @@
       <!-- 表示モード -->
       <div class="filter-item">
         <label for="mode-select" class="form-label small">表示モード</label>
-        <select id="mode-select" class="form-select form-select-sm w-auto">
+        <select id="mode-select" class="form-select form-select-sm">
           <option value="session">配信枠一覧 | Stream Sessions</option>
           <option value="song">曲名一覧 | Song List</option>
         </select>
@@ -59,7 +59,7 @@
       <!-- セッション絞り込み -->
       <div class="filter-item">
         <label for="session-select" class="form-label small">配信を選択</label>
-        <select id="session-select" class="form-select form-select-sm w-auto">
+        <select id="session-select" class="form-select form-select-sm">
           <option value="">すべての配信</option>
         </select>
       </div>
@@ -67,7 +67,7 @@
       <!-- カテゴリ絞り込み -->
       <div class="filter-item">
         <label for="category-select" class="form-label small">カテゴリ</label>
-        <select id="category-select" class="form-select form-select-sm w-auto">
+        <select id="category-select" class="form-select form-select-sm">
           <option value="">すべて</option>
         </select>
       </div>
@@ -75,11 +75,11 @@
       <!-- 配信枠並び替え -->
       <div class="filter-item">
         <label for="sort-session" class="form-label small">配信枠並び替え</label>
-        <select id="sort-session" class="form-select form-select-sm w-auto"></select>
+        <select id="sort-session" class="form-select form-select-sm"></select>
       </div>
 
-      <!-- 曲名検索 -->
-      <div class="filter-item">
+      <!-- 曲名検索（ここだけ自動で伸びる） -->
+      <div class="filter-item keyword">
         <label for="search-input" class="form-label small">曲名で絞り込み</label>
         <input
           type="text"
@@ -90,8 +90,9 @@
       </div>
 
       <!-- リセット -->
-      <div class="filter-item">
-        <button id="reset-btn" class="btn btn-outline-secondary btn-sm w-auto">
+      <div class="filter-item reset">
+        <label class="form-label small invisible">リセット</label>
+        <button id="reset-btn" class="btn btn-outline-secondary btn-sm">
           リセット
         </button>
       </div>
