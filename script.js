@@ -3,8 +3,10 @@
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS1O8_fE8vDDkvocXwcSIEAtF8eyxH-Jq_-6Wu09RCO1Y0AG7dfXYGsgjtJCCAqaJ37IX9YF23lZ3Ns/pub?output=csv';
 let allSongs = [];
 let allCategories = [];
+let renderQueue = []; // 無限スクロール用: 表示待ちセッション群
+let renderIndex = 0;  // 無限スクロール用: 現在描画済みインデックス
+let observer;         // 無限スクロール用: IntersectionObserver
 
-// 配信枠並び替えオプション
 const sessionSortOpts = [
   { value: 'date-desc', text: '配信日順（新しい順）' },
   { value: 'date-asc',  text: '配信日順（古い順）' },
@@ -19,7 +21,7 @@ window.addEventListener('DOMContentLoaded', () => {
       allSongs = data;
       initModeSelect();
       initSessionSelect();
-      initCategory();    // カテゴリ選択肢初期化
+      initCategory();
       initSortSelect();
       initSearch();
       initReset();
@@ -62,10 +64,7 @@ function initSessionSelect() {
 function initCategory() {
   const sel = document.getElementById('category-select');
   const cats = [...new Set(
-    allSongs
-      .filter(s => s['公開'] === '公開')
-      .map(s => s['Category'])
-      .filter(Boolean)
+    allSongs.filter(s => s['公開'] === '公開').map(s => s['Category']).filter(Boolean)
   )].sort();
   allCategories = cats;
 
@@ -108,25 +107,24 @@ function initReset() {
 }
 
 function applyView() {
+  const kw = document.getElementById('search-input').value.trim().toLowerCase();
+  if (kw !== '') {
+    document.getElementById('mode-select').value = 'song';
+  }
+  if (observer) observer.disconnect();
+  renderQueue = [];
+  renderIndex = 0;
+
   const mode         = document.getElementById('mode-select').value;
   const sessionVal   = document.getElementById('session-select').value;
   const categoryVal  = document.getElementById('category-select').value;
   const sortSession  = document.getElementById('sort-session').value;
-  const kw           = document.getElementById('search-input').value.trim().toLowerCase();
 
-  // 1) 「公開」だけ
   let list = allSongs.filter(s => s['公開'] === '公開');
-
-  // 2) セッション絞り込み
   if (sessionVal)  list = list.filter(s => s['配信URL'] === sessionVal);
-
-  // 3) カテゴリ絞り込み
   if (categoryVal) list = list.filter(s => s['Category'] === categoryVal);
-
-  // 4) 曲名絞り込み
   if (kw)          list = list.filter(s => (s['曲名']||'').toLowerCase().includes(kw));
 
-  // 5) 描画
   if (mode === 'session' && !kw) {
     renderBySession(list, sortSession);
   } else {
@@ -145,7 +143,7 @@ function renderBySession(songs, sortSession) {
       acc[k] = {
         date:  new Date(s['日付']),
         label: `${s['配信日']} ｜ ${s['配信タイトル']}`,
-        items:[]
+        items: []
       };
     }
     acc[k].items.push(s);
@@ -159,14 +157,26 @@ function renderBySession(songs, sortSession) {
       [arr[i], arr[j]] = [arr[j], arr[i]];
     }
   } else {
-    arr.sort((a, b) =>
-      sortSession === 'date-asc'
-        ? a.date - b.date
-        : b.date - a.date
-    );
+    arr.sort((a, b) => sortSession === 'date-asc' ? a.date - b.date : b.date - a.date);
   }
 
-  arr.forEach(sess => {
+  renderQueue = arr;
+  renderIndex = 0;
+  renderNextChunk();
+
+  if (observer) observer.disconnect();
+  observer = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting) renderNextChunk();
+  });
+  observer.observe(document.getElementById('scroll-anchor'));
+}
+
+function renderNextChunk() {
+  const c = document.getElementById('song-list');
+  let count = 0;
+
+  while (renderIndex < renderQueue.length && count < 100) {
+    const sess = renderQueue[renderIndex++];
     const h5 = document.createElement('h5');
     h5.className = 'mt-4';
     h5.textContent = sess.label;
@@ -174,35 +184,27 @@ function renderBySession(songs, sortSession) {
 
     const row = document.createElement('div');
     row.className = 'row g-3 mb-3';
-    sess.items
-      .sort((a, b) => Number(a['開始秒数']||0) - Number(b['開始秒数']||0))
+    sess.items.sort((a, b) => Number(a['開始秒数'] || 0) - Number(b['開始秒数'] || 0))
       .forEach(s => row.appendChild(createCardCol(s)));
     c.appendChild(row);
-  });
+
+    count += sess.items.length;
+  }
 }
 
-/**
- * 曲名表示モード or 絞り込み時のアコーディオン表示
- * グループ順も、展開時のリスト順も配信枠並び替え通りに
- */
 function renderGrouped(songs) {
   const c = document.getElementById('song-list');
   c.innerHTML = '';
   c.classList.add('accordion');
-
-  // 今の「配信枠並び替え」選択値を取得
   const sortSession = document.getElementById('sort-session').value;
 
-  // 1) 曲名ごとにグループ化
   const groups = songs.reduce((acc, s) => {
     const t = s['曲名'] || '（曲名なし）';
     (acc[t] ||= []).push(s);
     return acc;
   }, {});
 
-  // 2) 各グループ内を配信枠並び替えに従ってソート、かつグループの代表日を取得
   const groupArr = Object.entries(groups).map(([title, list]) => {
-    // グループ内ソート or シャッフル
     if (sortSession === 'random') {
       for (let i = list.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -214,44 +216,32 @@ function renderGrouped(songs) {
         return sortSession === 'date-asc' ? da - db : db - da;
       });
     }
-    // 代表日としてグループ内最初の要素の日付を使う
     const repDate = new Date(list[0]['日付']);
     return { title, list, repDate };
   });
 
-  // 3) グループ順も同じく配信枠並び替えに従って
   if (sortSession === 'random') {
     for (let i = groupArr.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [groupArr[i], groupArr[j]] = [groupArr[j], groupArr[i]];
     }
   } else {
-    groupArr.sort((a, b) =>
-      sortSession === 'date-asc'
-        ? a.repDate - b.repDate
-        : b.repDate - a.repDate
-    );
+    groupArr.sort((a, b) => sortSession === 'date-asc' ? a.repDate - b.repDate : b.repDate - a.repDate);
   }
 
-  // 4) 描画
   groupArr.forEach(({ title, list }, i) => {
     const id = `grp${i}`;
     const item = document.createElement('div');
     item.className = 'accordion-item';
     item.innerHTML = `
       <h2 class="accordion-header" id="heading-${id}">
-        <button class="accordion-button collapsed"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#collapse-${id}"
-                aria-expanded="false"
-                aria-controls="collapse-${id}">
+        <button class="accordion-button collapsed" type="button"
+                data-bs-toggle="collapse" data-bs-target="#collapse-${id}"
+                aria-expanded="false" aria-controls="collapse-${id}">
           ${title} （${list.length}件）
         </button>
       </h2>
-      <div id="collapse-${id}"
-           class="accordion-collapse collapse"
-           data-bs-parent="#song-list">
+      <div id="collapse-${id}" class="accordion-collapse collapse" data-bs-parent="#song-list">
         <div class="accordion-body p-0">
           <div class="row g-3 m-3">
             ${list.map(s => createCardCol(s).outerHTML).join('')}
@@ -263,32 +253,24 @@ function renderGrouped(songs) {
 }
 
 function createCardCol(song) {
-  const title     = song['曲名']||'（曲名なし）';
-  const dateDisp  = song['配信日']||'';
-  const sessTitle = song['配信タイトル']||'';
-  const note      = song['備考']||'';
-  const timeLink  = song['リンク']||'';
-  const origLink  = song['配信URL']||'';
-  const thumb     = song['ThumbnailURL']||'';
+  const title     = song['曲名'] || '（曲名なし）';
+  const dateDisp  = song['配信日'] || '';
+  const sessTitle = song['配信タイトル'] || '';
+  const note      = song['備考'] || '';
+  const timeLink  = song['リンク'] || '';
+  const origLink  = song['配信URL'] || '';
+  const thumb     = song['ThumbnailURL'] || '';
 
   const imgWrap = thumb
     ? `<div class="card-img-wrapper">
-         <img src="${thumb}" alt="${title}">
+         <img src="${thumb}" alt="${title}" loading="lazy">
        </div>`
     : '';
   const playBtn = timeLink
-    ? `<a href="${timeLink}"
-           target="_blank"
-           class="btn btn-primary flex-fill">
-         曲再生スタート
-       </a>`
+    ? `<a href="${timeLink}" target="_blank" class="btn btn-primary flex-fill">曲再生スタート</a>`
     : '';
   const origBtn = origLink
-    ? `<a href="${origLink}"
-           target="_blank"
-           class="btn btn-secondary flex-fill">
-         元配信リンク
-       </a>`
+    ? `<a href="${origLink}" target="_blank" class="btn btn-secondary flex-fill">元配信リンク</a>`
     : '';
   const noteHtml = note
     ? `<p class="text-muted mb-2">${note}</p>`
@@ -307,11 +289,7 @@ function createCardCol(song) {
         ${noteHtml}
         <div class="mt-auto d-flex gap-2">
           ${playBtn}${origBtn}
-          ${
-            !playBtn && !origBtn
-              ? '<span class="text-secondary">情報なし</span>'
-              : ''
-          }
+          ${!playBtn && !origBtn ? '<span class="text-secondary">情報なし</span>' : ''}
         </div>
       </div>
     </div>`;
