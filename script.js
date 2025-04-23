@@ -12,7 +12,9 @@ const i18n = {
     link: "元配信リンク",
     unknown: "情報なし",
     all_streams: "すべての配信",
-    all_categories: "すべて"
+    all_categories: "すべて",
+    fav_toggle_off: "★ お気に入りだけ表示",
+    fav_toggle_on: "★ お気に入り表示中"
   },
   en: {
     mode: "Display Mode",
@@ -27,9 +29,12 @@ const i18n = {
     link: "Original Stream",
     unknown: "No Info",
     all_streams: "All Streams",
-    all_categories: "All"
+    all_categories: "All",
+    fav_toggle_off: "★ Favorites Only",
+    fav_toggle_on: "★ Showing Favorites"
   }
 };
+
 let currentLang = "ja";
 
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS1O8_fE8vDDkvocXwcSIEAtF8eyxH-Jq_-6Wu09RCO1Y0AG7dfXYGsgjtJCCAqaJ37IX9YF23lZ3Ns/pub?output=csv';
@@ -53,6 +58,7 @@ window.addEventListener("DOMContentLoaded", () => {
       initCategory();
       initSortSelect();
       initSearch();
+      initFavoriteToggle();
       initReset();
       updateUILabels();
       applyView();
@@ -64,9 +70,9 @@ window.addEventListener("DOMContentLoaded", () => {
     langSelect.addEventListener("change", (e) => {
       currentLang = e.target.value;
       updateUILabels();
-      initSortSelect(); // 並び替えオプション再生成
-      initSessionSelect(); // 配信選択再生成
-      initCategory(); // カテゴリ再生成
+      initSortSelect();
+      initSessionSelect();
+      initCategory();
       applyView();
     });
   }
@@ -86,11 +92,17 @@ function updateUILabels() {
     modeSelect.options[0].textContent = i18n[currentLang].mode_session;
     modeSelect.options[1].textContent = i18n[currentLang].mode_song;
   }
+
+  const favBtn = document.getElementById("fav-only-btn");
+  if (favBtn) {
+    favBtn.textContent = favOnlyMode
+      ? i18n[currentLang].fav_toggle_on
+      : i18n[currentLang].fav_toggle_off;
+  }
 }
 
 function initModeSelect() {
-  document.getElementById('mode-select')
-    .addEventListener('change', applyView);
+  document.getElementById('mode-select').addEventListener('change', applyView);
 }
 
 function initSessionSelect() {
@@ -104,8 +116,7 @@ function initSessionSelect() {
     }
     return acc;
   }, {});
-  const arr = Object.entries(map)
-    .map(([url,o])=>({ url, label: o.label, date: o.date }))
+  const arr = Object.entries(map).map(([url,o])=>({ url, label: o.label, date: o.date }))
     .sort((a,b)=> b.date - a.date);
 
   sel.innerHTML = `<option value="">${i18n[currentLang].all_streams}</option>`;
@@ -121,9 +132,7 @@ function initSessionSelect() {
 function initCategory() {
   const sel = document.getElementById('category-select');
   const cats = [...new Set(
-    allSongs.filter(s => s['公開'] === '公開')
-            .map(s => s['Category'])
-            .filter(Boolean)
+    allSongs.filter(s => s['公開'] === '公開').map(s => s['Category']).filter(Boolean)
   )].sort();
   allCategories = cats;
 
@@ -151,21 +160,38 @@ function initSortSelect() {
 }
 
 function initSearch() {
-  document.getElementById('search-input')
-    .addEventListener('input', applyView);
+  document.getElementById('search-input').addEventListener('input', applyView);
 }
 
 function initReset() {
-  document.getElementById('reset-btn')
-    .addEventListener('click', () => {
-      document.getElementById('mode-select').value      = 'session';
-      document.getElementById('session-select').value   = '';
-      document.getElementById('category-select').value  = '';
-      document.getElementById('sort-session').value     = sessionSortOpts[0].value;
-      document.getElementById('search-input').value     = '';
-      applyView();
-    });
+  document.getElementById('reset-btn').addEventListener('click', () => {
+    document.getElementById('mode-select').value      = 'session';
+    document.getElementById('session-select').value   = '';
+    document.getElementById('category-select').value  = '';
+    document.getElementById('sort-session').value     = sessionSortOpts[0].value;
+    document.getElementById('search-input').value     = '';
+    applyView();
+  });
 }
+
+let favOnlyMode = false;
+
+function initFavoriteToggle() {
+  const btn = document.getElementById("fav-only-btn");
+  btn.addEventListener("click", () => {
+    favOnlyMode = !favOnlyMode;
+    btn.classList.toggle("active");
+    btn.classList.toggle("btn-warning");
+    btn.classList.toggle("btn-outline-warning");
+    updateUILabels(); // 言語に応じてボタンテキスト更新
+    applyView();
+  });
+}
+
+// ↓この下に render, createCardCol, getFavorites など続けてOKです（変更不要）
+
+
+
 
 function applyView() {
   const mode         = document.getElementById('mode-select').value;
@@ -175,6 +201,12 @@ function applyView() {
   const kw           = document.getElementById('search-input').value.trim().toLowerCase();
 
   let list = allSongs.filter(s => s['公開'] === '公開');
+
+  if (favOnlyMode) {
+    const favs = getFavorites();
+    list = list.filter(s => favs.includes(s['リンク'] || s['配信URL']));
+  }
+
   if (sessionVal)  list = list.filter(s => s['配信URL'] === sessionVal);
   if (categoryVal) list = list.filter(s => s['Category'] === categoryVal);
   if (kw)          list = list.filter(s => (s['曲名']||'').toLowerCase().includes(kw));
@@ -186,6 +218,131 @@ function applyView() {
   }
 }
 
+
+// ← この下に createCardCol(), renderBySession(), renderGrouped() を続けます
+
+function getFavorites() {
+  const raw = localStorage.getItem('favorites') || '[]';
+  return JSON.parse(raw);
+}
+function addFavorite(link) {
+  const favs = getFavorites();
+  if (!favs.includes(link)) {
+    favs.push(link);
+    localStorage.setItem('favorites', JSON.stringify(favs));
+  }
+}
+function removeFavorite(link) {
+  const favs = getFavorites().filter(f => f !== link);
+  localStorage.setItem('favorites', JSON.stringify(favs));
+}
+function isFavorite(link) {
+  return getFavorites().includes(link);
+}
+
+function createCardCol(song) {
+  const title     = song['曲名']||'（曲名なし）';
+  const dateDisp  = song['配信日']||'';
+  const sessTitle = song['配信タイトル']||'';
+  const note      = song['備考']||'';
+  const timeLink  = song['リンク']||'';
+  const origLink  = song['配信URL']||'';
+  const thumb     = song['ThumbnailURL']||'';
+
+  const favKey = timeLink || origLink;
+  const isFav = isFavorite(favKey);
+
+  const col = document.createElement('div');
+  col.className = 'col-12 col-sm-6 col-md-4';
+
+  const card = document.createElement('div');
+  card.className = 'card h-100 position-relative';
+
+  if (thumb) {
+    const imgWrap = document.createElement('div');
+    imgWrap.className = 'card-img-wrapper';
+
+    const img = document.createElement('img');
+    img.src = thumb;
+    img.alt = title;
+
+    const btn = document.createElement('button');
+    btn.className = 'fav-btn' + (isFav ? ' active' : '');
+    btn.textContent = isFav ? '★' : '☆';
+    btn.setAttribute('data-link', favKey);
+
+    btn.addEventListener('click', () => {
+      const nowFav = isFavorite(favKey);
+      if (nowFav) {
+        removeFavorite(favKey);
+        btn.classList.remove('active');
+        btn.textContent = '☆';
+      } else {
+        addFavorite(favKey);
+        btn.classList.add('active');
+        btn.textContent = '★';
+      }
+    });
+
+    imgWrap.appendChild(btn);
+    imgWrap.appendChild(img);
+    card.appendChild(imgWrap);
+  }
+
+  const body = document.createElement('div');
+  body.className = 'card-body d-flex flex-column';
+
+  const h5 = document.createElement('h5');
+  h5.className = 'card-title';
+  h5.textContent = title;
+
+  const pMeta = document.createElement('p');
+  pMeta.className = 'text-muted mb-2';
+  pMeta.style.fontSize = '0.9rem';
+  pMeta.textContent = `${dateDisp}${sessTitle ? ' ｜ ' + sessTitle : ''}`;
+
+  const pNote = note ? document.createElement('p') : null;
+  if (pNote) {
+    pNote.className = 'text-muted mb-2';
+    pNote.textContent = note;
+  }
+
+  const btnArea = document.createElement('div');
+  btnArea.className = 'mt-auto d-flex gap-2';
+
+  if (timeLink) {
+    const a1 = document.createElement('a');
+    a1.href = timeLink;
+    a1.target = '_blank';
+    a1.className = 'btn btn-primary flex-fill';
+    a1.textContent = i18n[currentLang].play;
+    btnArea.appendChild(a1);
+  }
+  if (origLink) {
+    const a2 = document.createElement('a');
+    a2.href = origLink;
+    a2.target = '_blank';
+    a2.className = 'btn btn-secondary flex-fill';
+    a2.textContent = i18n[currentLang].link;
+    btnArea.appendChild(a2);
+  }
+  if (!timeLink && !origLink) {
+    const span = document.createElement('span');
+    span.className = 'text-secondary';
+    span.textContent = i18n[currentLang].unknown;
+    btnArea.appendChild(span);
+  }
+
+  body.appendChild(h5);
+  body.appendChild(pMeta);
+  if (pNote) body.appendChild(pNote);
+  body.appendChild(btnArea);
+
+  card.appendChild(body);
+  col.appendChild(card);
+  return col;
+}
+
 function renderBySession(songs, sortSession) {
   const c = document.getElementById('song-list');
   c.innerHTML = '';
@@ -195,7 +352,7 @@ function renderBySession(songs, sortSession) {
     const k = s['配信URL'];
     if (!acc[k]) {
       acc[k] = {
-        date: new Date(s['日付']),
+        date:  new Date(s['日付']),
         label: `${s['配信日']} ｜ ${s['配信タイトル']}`,
         items:[]
       };
@@ -224,8 +381,7 @@ function renderBySession(songs, sortSession) {
 
     const row = document.createElement('div');
     row.className = 'row g-3 mb-3';
-    sess.items
-      .sort((a, b) => Number(a['開始秒数']||0) - Number(b['開始秒数']||0))
+    sess.items.sort((a, b) => Number(a['開始秒数']||0) - Number(b['開始秒数']||0))
       .forEach(s => row.appendChild(createCardCol(s)));
     c.appendChild(row);
   });
@@ -242,7 +398,6 @@ function renderGrouped(songs) {
     (acc[t] ||= []).push(s);
     return acc;
   }, {});
-
   const groupArr = Object.entries(groups).map(([title, list]) => {
     if (sortSession === 'random') {
       for (let i = list.length - 1; i > 0; i--) {
@@ -250,20 +405,30 @@ function renderGrouped(songs) {
         [list[i], list[j]] = [list[j], list[i]];
       }
     } else {
-      list.sort((a, b) => new Date(a['日付']) - new Date(b['日付']));
-      if (sortSession === 'date-desc') list.reverse();
+      list.sort((a, b) => {
+        const da = new Date(a['日付']), db = new Date(b['日付']);
+        return sortSession === 'date-asc' ? da - db : db - da;
+      });
     }
     const repDate = new Date(list[0]['日付']);
     return { title, list, repDate };
   });
 
-  if (sortSession !== 'random') {
-    groupArr.sort((a, b) => sortSession === 'date-asc' ? a.repDate - b.repDate : b.repDate - a.repDate);
+  if (sortSession === 'random') {
+    for (let i = groupArr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [groupArr[i], groupArr[j]] = [groupArr[j], groupArr[i]];
+    }
+  } else {
+    groupArr.sort((a, b) =>
+      sortSession === 'date-asc'
+        ? a.repDate - b.repDate
+        : b.repDate - a.repDate
+    );
   }
 
   groupArr.forEach(({ title, list }, i) => {
     const id = `grp${i}`;
-    const label = `${title} (${list.length} ${currentLang === 'ja' ? '件' : 'items'})`;
     const item = document.createElement('div');
     item.className = 'accordion-item';
     item.innerHTML = `
@@ -271,55 +436,16 @@ function renderGrouped(songs) {
         <button class="accordion-button collapsed" type="button"
                 data-bs-toggle="collapse" data-bs-target="#collapse-${id}"
                 aria-expanded="false" aria-controls="collapse-${id}">
-          ${label}
+          ${title} （${list.length}件）
         </button>
       </h2>
-      <div id="collapse-${id}" class="accordion-collapse collapse"
-           data-bs-parent="#song-list">
+      <div id="collapse-${id}" class="accordion-collapse collapse" data-bs-parent="#song-list">
         <div class="accordion-body p-0">
-          <div class="row g-3 m-3">
-            ${list.map(s => createCardCol(s).outerHTML).join('')}
-          </div>
+          <div class="row g-3 m-3"></div>
         </div>
       </div>`;
+    const bodyRow = item.querySelector('.row');
+    list.forEach(s => bodyRow.appendChild(createCardCol(s)));
     c.appendChild(item);
   });
-}
-
-function createCardCol(song) {
-  const title = song['曲名'] || '（曲名なし）';
-  const dateDisp = song['配信日'] || '';
-  const sessTitle = song['配信タイトル'] || '';
-  const note = song['備考'] || '';
-  const timeLink = song['リンク'] || '';
-  const origLink = song['配信URL'] || '';
-  const thumb = song['ThumbnailURL'] || '';
-
-  const imgWrap = thumb
-    ? `<div class="card-img-wrapper"><img src="${thumb}" alt="${title}"></div>` : '';
-  const playBtn = timeLink
-    ? `<a href="${timeLink}" target="_blank" class="btn btn-primary flex-fill">${i18n[currentLang].play}</a>` : '';
-  const origBtn = origLink
-    ? `<a href="${origLink}" target="_blank" class="btn btn-secondary flex-fill">${i18n[currentLang].link}</a>` : '';
-  const noteHtml = note
-    ? `<p class="text-muted mb-2">${note}</p>` : '';
-
-  const col = document.createElement('div');
-  col.className = 'col-12 col-sm-6 col-md-4';
-  col.innerHTML = `
-    <div class="card h-100">
-      ${imgWrap}
-      <div class="card-body d-flex flex-column">
-        <h5 class="card-title">${title}</h5>
-        <p class="text-muted mb-2" style="font-size:0.9rem">
-          ${dateDisp}${sessTitle ? ' ｜ ' + sessTitle : ''}
-        </p>
-        ${noteHtml}
-        <div class="mt-auto d-flex gap-2">
-          ${playBtn}${origBtn}
-          ${!playBtn && !origBtn ? '<span class="text-secondary">' + i18n[currentLang].unknown + '</span>' : ''}
-        </div>
-      </div>
-    </div>`;
-  return col;
 }

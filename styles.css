@@ -1,171 +1,209 @@
+/* カラー変数 */
 :root {
-    --primary-accent:   #FF8000;
-    --secondary-accent: #3366CC;
-    --bg-base:          #FFFFFF;
-    --text-base:        #000000;
+  --primary-accent:   #FF8000;
+  --secondary-accent: #3366CC;
+  --bg-base:          #FFFFFF;
+  --text-base:        #000000;
+}
+
+/* 全体 */
+body {
+  background-color: var(--bg-base);
+  color: var(--text-base);
+}
+
+/* ボタンカラー */
+.btn-primary {
+  background-color: var(--primary-accent) !important;
+  border-color:     var(--primary-accent) !important;
+  color:            #fff !important;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(255, 128, 0, 0.4);
+  font-size: 1rem;
+}
+.btn-secondary {
+  background-color: var(--secondary-accent) !important;
+  border-color:     var(--secondary-accent) !important;
+  color:            #fff !important;
+  opacity: 0.85;
+  font-size: 0.95rem;
+}
+
+/* アコーディオン開閉ヘッダー */
+.accordion-button:not(.collapsed) {
+  background-color: var(--primary-accent);
+  color: #fff;
+}
+
+/* フォーカス時 */
+.form-select:focus,
+.form-control:focus {
+  border-color: var(--primary-accent);
+  box-shadow: 0 0 0 0.2rem rgba(255,128,0,0.25);
+}
+
+/* リンクホバー */
+a:hover {
+  color: var(--primary-accent);
+}
+
+/* フィルタバー */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.filter-item {
+  display: flex;
+  flex-direction: column;
+}
+.filter-item label {
+  margin-bottom: 0.25rem;
+  font-size: 0.85rem;
+}
+
+/* keywordとresetの横幅調整（PC） */
+@media (min-width: 576px) {
+  .filter-item.keyword {
+    flex: 1 1 auto;
+    min-width: 12rem;
   }
-  
-  body {
-    background-color: var(--bg-base);
-    color: var(--text-base);
+  .filter-item.reset {
+    flex: 0 0 auto;
+    min-width: 6rem;
+    align-self: flex-end;
   }
-  
-  /* タイトル装飾 */
-  h1 {
-    font-size: 2rem;
-    font-weight: bold;
-    color: var(--primary-accent);
-    text-align: center;
-    margin-bottom: 0.5rem;
-    border-bottom: 3px solid var(--secondary-accent);
-    display: block;
-    max-width: 100%;
-    padding-bottom: 0.3rem;
-    word-break: keep-all;
-    text-wrap: balance;
+  .filter-item:not(.keyword):not(.reset) select,
+  .filter-item:not(.keyword):not(.reset) input,
+  .filter-item:not(.keyword):not(.reset) button {
+    width: auto;
   }
-  h1 small {
-    display: block;
-    font-size: 1.1rem;
-    color: var(--secondary-accent);
-    font-weight: 500;
-    margin-top: 0.3rem;
-  }
-  
-  /* ボタン */
-  .btn-primary {
-    background-color: var(--primary-accent) !important;
-    border-color:     var(--primary-accent) !important;
-    color:            #fff !important;
-    font-weight: bold;
-    box-shadow: 0 2px 8px rgba(255, 128, 0, 0.4);
-    font-size: 1rem;
-  }
-  .btn-secondary {
-    background-color: var(--secondary-accent) !important;
-    border-color:     var(--secondary-accent) !important;
-    color:            #fff !important;
-    opacity: 0.85;
-    font-size: 0.95rem;
-  }
-  
-  /* アコーディオン */
-  .accordion-button {
-    font-weight: bold;
-    font-size: 1.05rem;
-    color: var(--text-base);
-    background-color: #f9f9f9;
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
-    border-top: 1px solid #ddd;
-  }
-  .accordion-button.collapsed {
-    background-color: #fff;
-    color: var(--text-base);
-    border-bottom: 1px solid #eee;
-  }
-  
-  /* カード */
-  .card-title {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #000;
-  }
-  .card-body .text-muted {
-    font-size: 0.8rem;
-    color: #666;
-  }
-  .card-img-wrapper {
-    position: relative;
-    width: 100%;
-    padding-top: 56.25%;
-    overflow: hidden;
-  }
-  .card-img-wrapper img {
-    position: absolute;
-    top: 50%; left: 50%;
-    width: auto; height: 100%;
-    transform: translate(-50%, -50%);
-    object-fit: cover;
-  }
-  
-  /* 入力フォーカス */
-  .form-select:focus,
-  .form-control:focus {
-    border-color: var(--primary-accent);
-    box-shadow: 0 0 0 0.2rem rgba(255,128,0,0.25);
-  }
-  
-  /* フィルタバー */
+}
+
+/* モバイル：縦並び */
+@media (max-width: 575.98px) {
   .filter-bar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem;
+    flex-direction: column;
+    gap: 0.75rem;
   }
   .filter-item {
-    display: flex;
-    flex-direction: column;
+    width: 100% !important;
+  }
+  .filter-item.reset button {
+    width: 100%;
+  }
+  #song-list .row {
+    display: block;
+  }
+  #song-list .col-12,
+  #song-list .col-sm-6,
+  #song-list .col-md-4 {
+    width: 100% !important;
+    margin-bottom: 1rem;
+  }
+  h1 {
+    font-size: 1.5rem;
+  }
+  h1 small {
+    font-size: 0.95rem;
+  }
+  .card-title {
+    font-size: 1.05rem;
+  }
+  .btn-primary, .btn-secondary {
+    font-size: 0.95rem;
+    padding: 0.5rem;
   }
   .filter-item label {
-    margin-bottom: 0.25rem;
     font-size: 0.85rem;
   }
-  
-  /* keywordとresetの横幅調整 */
-  @media (min-width: 576px) {
-    .filter-item.keyword {
-      flex: 1 1 auto;
-      min-width: 12rem;
-    }
-    .filter-item.reset {
-      flex: 0 0 auto;
-      min-width: 6rem;
-      align-self: flex-end;
-    }
-    .filter-item:not(.keyword):not(.reset) select,
-    .filter-item:not(.keyword):not(.reset) input,
-    .filter-item:not(.keyword):not(.reset) button {
-      width: auto;
-    }
-  }
-  
-  /* モバイル */
-  @media (max-width: 575.98px) {
-    .filter-bar {
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-    .filter-item {
-      width: 100% !important;
-    }
-    .filter-item.reset button {
-      width: 100%;
-    }
-    #song-list .row {
-      display: block;
-    }
-    #song-list .col-12,
-    #song-list .col-sm-6,
-    #song-list .col-md-4 {
-      width: 100% !important;
-      margin-bottom: 1rem;
-    }
-    h1 {
-      font-size: 1.5rem;
-    }
-    h1 small {
-      font-size: 0.95rem;
-    }
-    .card-title {
-      font-size: 1.05rem;
-    }
-    .btn-primary, .btn-secondary {
-      font-size: 0.95rem;
-      padding: 0.5rem;
-    }
-    .filter-item label {
-      font-size: 0.85rem;
-    }
-  }
-  
+}
+
+/* タイトル */
+h1 {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--primary-accent);
+  text-align: center;
+  margin-bottom: 0.5rem;
+  border-bottom: 3px solid var(--secondary-accent);
+  display: inline-block;
+  padding-bottom: 0.3rem;
+}
+h1 small {
+  display: block;
+  font-size: 1rem;
+  color: var(--secondary-accent);
+  font-weight: normal;
+  margin-top: 0.3rem;
+}
+
+/* カード */
+.card-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #000;
+}
+.card-body .text-muted {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+/* サムネイルクロップ */
+.card-img-wrapper {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%;
+  overflow: hidden;
+}
+.card-img-wrapper img {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: auto; height: 100%;
+  transform: translate(-50%, -50%);
+  object-fit: cover;
+}
+
+/* ☆ お気に入りボタン */
+.fav-btn {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.5rem;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid #ccc;
+  font-size: 1.4rem;
+  color: #888;
+  z-index: 2;
+  cursor: pointer;
+  padding: 0.1rem 0.4rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  transition: color 0.2s ease, background 0.2s ease;
+}
+.fav-btn:hover {
+  color: var(--primary-accent);
+  background: #fff;
+}
+.fav-btn.active {
+  color: var(--primary-accent);
+  background: #fff;
+  border-color: var(--primary-accent);
+}
+
+/* お気に入りだけ表示ボタンのスタイル */
+#fav-only-btn {
+  font-weight: bold;
+  color: var(--primary-accent);
+  border-color: var(--primary-accent);
+  background-color: #fff;
+}
+#fav-only-btn:hover {
+  background-color: var(--primary-accent);
+  color: #fff;
+}
+#fav-only-btn.active {
+  background-color: var(--primary-accent);
+  color: #fff;
+  border-color: var(--primary-accent);
+}

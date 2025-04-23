@@ -5,44 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>不知火フレア 歌枠＆MV 一覧サイト | Jump to Flare’s Live & MVs</title>
   <meta name="description" content="不知火フレアさんのYouTube歌枠やMVを頭出しリンク付きで一覧化。Jump to Flare’s Live & MVsで好みの楽曲へすぐアクセス！" />
-  <meta name="keywords" content="不知火フレア, ホロライブ, 歌枠, フレア MV, フレア 歌一覧, Flare Songs, hololive" />
-  <meta name="author" content="ERAN🔥" />
-  <meta property="og:title" content="不知火フレア 歌一覧まとめ | Jump to Flare's Live & MVs" />
-  <meta property="og:description" content="不知火フレアさんのYouTube歌枠やMVを、頭出しリンク付きで一覧化。気になる曲をすぐに再生できるファンサイトです。" />
+  <meta name="keywords" content="不知火フレア, ホロライブ, 歌枠, MV, Flare Songs, Hololive" />
+  <meta property="og:title" content="不知火フレア 歌枠＆MV一覧" />
+  <meta property="og:description" content="不知火フレアさんの歌配信を頭出しリンク付きでまとめたファンサイト。" />
   <meta property="og:url" content="https://erantrick.github.io/flare-songs/" />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="不知火フレア 歌一覧まとめ" />
-  <meta name="twitter:description" content="フレアさんの歌声がすぐ聴ける、頭出しリンク付き一覧サイト。" />
-  <meta name="twitter:site" content="@eran_trick" />
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
+
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
 </head>
 <body>
   <div class="container py-4">
-    <h1 class="mb-2">
+    <h1 class="mb-2 text-center">
       不知火フレア 歌枠＆MV 一覧サイト<br />
       <small class="text-muted">Jump to Flare’s Live &amp; MVs</small>
     </h1>
 
-    <!-- ▼ 言語切り替えセレクトボックス -->
-    <div class="text-end mb-3">
-      <label for="lang-select" class="form-label me-2">Language:</label>
-      <select id="lang-select" class="form-select form-select-sm d-inline-block w-auto">
+    <div class="text-end mb-2">
+      <select id="lang-select" class="form-select form-select-sm w-auto d-inline">
         <option value="ja">日本語</option>
         <option value="en">English</option>
       </select>
     </div>
 
-    <!-- ▼ フィルタ＆並び替え -->
     <div class="mb-4 filter-bar">
       <div class="filter-item">
         <label for="mode-select" class="form-label small">表示モード</label>
         <select id="mode-select" class="form-select form-select-sm">
-          <option value="session">配信枠一覧 | Stream Sessions</option>
-          <option value="song">曲名一覧 | Song List</option>
+          <option value="session">配信枠一覧</option>
+          <option value="song">曲名一覧</option>
         </select>
       </div>
       <div class="filter-item">
@@ -58,20 +52,27 @@
         </select>
       </div>
       <div class="filter-item">
-        <label for="sort-session" class="form-label small">配信枠並び替え</label>
+        <label for="sort-session" class="form-label small">並び順</label>
         <select id="sort-session" class="form-select form-select-sm"></select>
       </div>
       <div class="filter-item keyword">
         <label for="search-input" class="form-label small">曲名で絞り込み</label>
         <input type="text" id="search-input" class="form-control form-control-sm" placeholder="キーワード..." />
       </div>
+      <!-- お気に入りのみ -->
+<div class="filter-item favorite-toggle">
+  <label class="form-label small invisible">お気に入りのみ</label>
+  <button id="fav-only-btn" class="btn btn-outline-warning btn-sm">
+    ★ お気に入りだけ表示
+  </button>
+</div>
+
       <div class="filter-item reset">
         <label class="form-label small invisible">リセット</label>
         <button id="reset-btn" class="btn btn-outline-secondary btn-sm">リセット</button>
       </div>
     </div>
 
-    <!-- 曲リスト表示領域 -->
     <div id="song-list" class="accordion"></div>
   </div>
 
