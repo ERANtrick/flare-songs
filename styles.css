@@ -2,39 +2,37 @@
 
 /* カラー変数 */
 :root {
-    --primary-accent:   #FF8000;  /* メインアクセント：オレンジ */
-    --secondary-accent: #3366CC;  /* サブアクセント：ブルー */
-    --bg-base:          #FFFFFF;  /* 背景色：白 */
-    --text-base:        #000000;  /* テキスト色：黒 */
+    --primary-accent:   #FF8000;
+    --secondary-accent: #3366CC;
+    --bg-base:          #FFFFFF;
+    --text-base:        #000000;
   }
   
-  /* ページ全体 */
+  /* 全体 */
   body {
     background-color: var(--bg-base);
     color: var(--text-base);
   }
   
-  /* メインボタン（btn-primary） */
+  /* ボタンカラー */
   .btn-primary {
     background-color: var(--primary-accent) !important;
     border-color:     var(--primary-accent) !important;
     color:            #fff !important;
   }
-  
-  /* サブボタン（btn-secondary） */
   .btn-secondary {
     background-color: var(--secondary-accent) !important;
     border-color:     var(--secondary-accent) !important;
     color:            #fff !important;
   }
   
-  /* アコーディオン開いたときのヘッダー */
+  /* アコーディオン開閉ヘッダー */
   .accordion-button:not(.collapsed) {
     background-color: var(--primary-accent);
     color:            #fff;
   }
   
-  /* フォーム要素フォーカス時 */
+  /* フォーカス時 */
   .form-select:focus,
   .form-control:focus {
     border-color: var(--primary-accent);
@@ -44,5 +42,50 @@
   /* リンクホバー */
   a:hover {
     color: var(--primary-accent);
+  }
+  
+  /* ── フィルタバー共通設定 ── */
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .filter-bar .filter-item {
+    display: flex;
+    flex-direction: column;
+  }
+  .filter-bar .filter-item label {
+    margin-bottom: 0.25rem;
+    font-size: 0.85rem;
+  }
+  
+  /* ── モバイル縦並び設定 ── */
+  @media (max-width: 576px) {
+    .filter-bar {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .filter-bar .filter-item {
+      width: 100% !important;
+    }
+    /* リセットボタン全幅に */
+    .filter-bar #reset-btn {
+      width: 100%;
+    }
+  }
+  
+  /* ── モバイルカード縦表示 ── */
+  @media (max-width: 576px) {
+    #song-list .row {
+      display: block;
+    }
+    #song-list .col-12,
+    #song-list .col-sm-6,
+    #song-list .col-md-4 {
+      width: 100% !important;
+      margin-bottom: 1rem;
+    }
   }
   

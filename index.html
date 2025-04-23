@@ -15,7 +15,7 @@
     rel="stylesheet"
   />
 
-  <!-- 自作スタイル（styles.css） -->
+  <!-- 自作スタイル -->
   <link rel="stylesheet" href="styles.css" />
 
   <!-- サムネイル中央クロップ用スタイル -->
@@ -45,51 +45,57 @@
       <small class="text-muted">Jump to Flare’s Live &amp; MVs</small>
     </h1>
 
-    <!-- 表示モード切替 -->
-    <div class="mb-3 d-flex align-items-center gap-2">
-      <label for="mode-select" class="m-0">表示モード:</label>
-      <select id="mode-select" class="form-select w-auto">
-        <option value="session">配信枠一覧 | Stream Sessions</option>
-        <option value="song">曲名一覧 | Song List</option>
-      </select>
-    </div>
+    <!-- ▼ フィルタ＆並び替えエリア -->
+    <div class="mb-4 filter-bar">
+      <!-- 表示モード -->
+      <div class="filter-item">
+        <label for="mode-select" class="form-label small">表示モード</label>
+        <select id="mode-select" class="form-select form-select-sm w-auto">
+          <option value="session">配信枠一覧 | Stream Sessions</option>
+          <option value="song">曲名一覧 | Song List</option>
+        </select>
+      </div>
 
-    <!-- セッション絞り込み -->
-    <div class="mb-3 d-flex align-items-center gap-2">
-      <label for="session-select" class="m-0">配信を選択:</label>
-      <select id="session-select" class="form-select w-auto">
-        <option value="">すべての配信</option>
-      </select>
-    </div>
+      <!-- セッション絞り込み -->
+      <div class="filter-item">
+        <label for="session-select" class="form-label small">配信を選択</label>
+        <select id="session-select" class="form-select form-select-sm w-auto">
+          <option value="">すべての配信</option>
+        </select>
+      </div>
 
-    <!-- カテゴリ絞り込み -->
-    <div class="mb-3 d-flex align-items-center gap-2">
-      <label for="category-select" class="m-0">カテゴリ:</label>
-      <select id="category-select" class="form-select w-auto">
-        <option value="">すべて</option>
-      </select>
-    </div>
+      <!-- カテゴリ絞り込み -->
+      <div class="filter-item">
+        <label for="category-select" class="form-label small">カテゴリ</label>
+        <select id="category-select" class="form-select form-select-sm w-auto">
+          <option value="">すべて</option>
+        </select>
+      </div>
 
-    <!-- 配信枠並び替え -->
-    <div class="mb-3 d-flex align-items-center gap-2">
-      <label for="sort-session" class="m-0">配信枠並び替え:</label>
-      <select id="sort-session" class="form-select w-auto"></select>
-    </div>
+      <!-- 配信枠並び替え -->
+      <div class="filter-item">
+        <label for="sort-session" class="form-label small">配信枠並び替え</label>
+        <select id="sort-session" class="form-select form-select-sm w-auto"></select>
+      </div>
 
-    <!-- 検索ボックス -->
-    <div class="mb-3">
-      <input
-        type="text"
-        id="search-input"
-        class="form-control"
-        placeholder="曲名で絞り込み..."
-      />
-    </div>
+      <!-- 曲名検索 -->
+      <div class="filter-item">
+        <label for="search-input" class="form-label small">曲名で絞り込み</label>
+        <input
+          type="text"
+          id="search-input"
+          class="form-control form-control-sm"
+          placeholder="キーワード..."
+        />
+      </div>
 
-    <!-- リセットボタン -->
-    <button id="reset-btn" class="btn btn-outline-secondary btn-sm mb-3">
-      リセット
-    </button>
+      <!-- リセット -->
+      <div class="filter-item">
+        <button id="reset-btn" class="btn btn-outline-secondary btn-sm w-auto">
+          リセット
+        </button>
+      </div>
+    </div>
 
     <!-- 曲リスト表示領域 -->
     <div id="song-list" class="accordion"></div>
