@@ -1,19 +1,48 @@
-// script.js
+const i18n = {
+  ja: {
+    mode: "表示モード",
+    mode_session: "配信枠一覧 | Stream Sessions",
+    mode_song: "曲名一覧 | Song List",
+    session: "配信を選択",
+    category: "カテゴリ",
+    sort: "配信枠並び替え",
+    keyword: "曲名で絞り込み",
+    reset: "リセット",
+    play: "曲再生スタート",
+    link: "元配信リンク",
+    unknown: "情報なし",
+    all_streams: "すべての配信",
+    all_categories: "すべて"
+  },
+  en: {
+    mode: "Display Mode",
+    mode_session: "Stream Sessions",
+    mode_song: "Song List",
+    session: "Select Stream",
+    category: "Category",
+    sort: "Sort by",
+    keyword: "Filter by keyword",
+    reset: "Reset",
+    play: "Play Song",
+    link: "Original Stream",
+    unknown: "No Info",
+    all_streams: "All Streams",
+    all_categories: "All"
+  }
+};
+let currentLang = "ja";
 
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS1O8_fE8vDDkvocXwcSIEAtF8eyxH-Jq_-6Wu09RCO1Y0AG7dfXYGsgjtJCCAqaJ37IX9YF23lZ3Ns/pub?output=csv';
 let allSongs = [];
 let allCategories = [];
-let renderQueue = []; // 無限スクロール用: 表示待ちセッション群
-let renderIndex = 0;  // 無限スクロール用: 現在描画済みインデックス
-let observer;         // 無限スクロール用: IntersectionObserver
 
 const sessionSortOpts = [
-  { value: 'date-desc', text: '配信日順（新しい順）' },
-  { value: 'date-asc',  text: '配信日順（古い順）' },
-  { value: 'random',    text: 'ランダム' }
+  { value: 'date-desc', text: { ja: '配信日順（新しい順）', en: 'Newest First' }},
+  { value: 'date-asc',  text: { ja: '配信日順（古い順）', en: 'Oldest First' }},
+  { value: 'random',    text: { ja: 'ランダム', en: 'Random' }}
 ];
 
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener("DOMContentLoaded", () => {
   Papa.parse(CSV_URL, {
     download: true,
     header: true,
@@ -25,10 +54,39 @@ window.addEventListener('DOMContentLoaded', () => {
       initSortSelect();
       initSearch();
       initReset();
+      updateUILabels();
       applyView();
     }
   });
+
+  const langSelect = document.getElementById("lang-select");
+  if (langSelect) {
+    langSelect.addEventListener("change", (e) => {
+      currentLang = e.target.value;
+      updateUILabels();
+      initSortSelect(); // 並び替えオプション再生成
+      initSessionSelect(); // 配信選択再生成
+      initCategory(); // カテゴリ再生成
+      applyView();
+    });
+  }
 });
+
+function updateUILabels() {
+  document.querySelector("label[for='mode-select']").textContent = i18n[currentLang].mode;
+  document.querySelector("label[for='session-select']").textContent = i18n[currentLang].session;
+  document.querySelector("label[for='category-select']").textContent = i18n[currentLang].category;
+  document.querySelector("label[for='sort-session']").textContent = i18n[currentLang].sort;
+  document.querySelector("label[for='search-input']").textContent = i18n[currentLang].keyword;
+  document.getElementById("search-input").placeholder = i18n[currentLang].keyword + "...";
+  document.getElementById("reset-btn").textContent = i18n[currentLang].reset;
+
+  const modeSelect = document.getElementById("mode-select");
+  if (modeSelect) {
+    modeSelect.options[0].textContent = i18n[currentLang].mode_session;
+    modeSelect.options[1].textContent = i18n[currentLang].mode_song;
+  }
+}
 
 function initModeSelect() {
   document.getElementById('mode-select')
@@ -46,15 +104,14 @@ function initSessionSelect() {
     }
     return acc;
   }, {});
-
   const arr = Object.entries(map)
     .map(([url,o])=>({ url, label: o.label, date: o.date }))
     .sort((a,b)=> b.date - a.date);
 
-  sel.innerHTML = '<option value="">すべての配信</option>';
+  sel.innerHTML = `<option value="">${i18n[currentLang].all_streams}</option>`;
   arr.forEach(o => {
     const opt = document.createElement('option');
-    opt.value       = o.url;
+    opt.value = o.url;
     opt.textContent = o.label;
     sel.appendChild(opt);
   });
@@ -64,13 +121,16 @@ function initSessionSelect() {
 function initCategory() {
   const sel = document.getElementById('category-select');
   const cats = [...new Set(
-    allSongs.filter(s => s['公開'] === '公開').map(s => s['Category']).filter(Boolean)
+    allSongs.filter(s => s['公開'] === '公開')
+            .map(s => s['Category'])
+            .filter(Boolean)
   )].sort();
   allCategories = cats;
 
+  sel.innerHTML = `<option value="">${i18n[currentLang].all_categories}</option>`;
   cats.forEach(cat => {
     const opt = document.createElement('option');
-    opt.value       = cat;
+    opt.value = cat;
     opt.textContent = cat;
     sel.appendChild(opt);
   });
@@ -79,10 +139,11 @@ function initCategory() {
 
 function initSortSelect() {
   const ss = document.getElementById('sort-session');
+  ss.innerHTML = '';
   sessionSortOpts.forEach(o => {
     const opt = document.createElement('option');
-    opt.value       = o.value;
-    opt.textContent = o.text;
+    opt.value = o.value;
+    opt.textContent = o.text[currentLang];
     ss.appendChild(opt);
   });
   ss.value = sessionSortOpts[0].value;
@@ -107,18 +168,11 @@ function initReset() {
 }
 
 function applyView() {
-  const kw = document.getElementById('search-input').value.trim().toLowerCase();
-  if (kw !== '') {
-    document.getElementById('mode-select').value = 'song';
-  }
-  if (observer) observer.disconnect();
-  renderQueue = [];
-  renderIndex = 0;
-
   const mode         = document.getElementById('mode-select').value;
   const sessionVal   = document.getElementById('session-select').value;
   const categoryVal  = document.getElementById('category-select').value;
   const sortSession  = document.getElementById('sort-session').value;
+  const kw           = document.getElementById('search-input').value.trim().toLowerCase();
 
   let list = allSongs.filter(s => s['公開'] === '公開');
   if (sessionVal)  list = list.filter(s => s['配信URL'] === sessionVal);
@@ -141,9 +195,9 @@ function renderBySession(songs, sortSession) {
     const k = s['配信URL'];
     if (!acc[k]) {
       acc[k] = {
-        date:  new Date(s['日付']),
+        date: new Date(s['日付']),
         label: `${s['配信日']} ｜ ${s['配信タイトル']}`,
-        items: []
+        items:[]
       };
     }
     acc[k].items.push(s);
@@ -157,26 +211,12 @@ function renderBySession(songs, sortSession) {
       [arr[i], arr[j]] = [arr[j], arr[i]];
     }
   } else {
-    arr.sort((a, b) => sortSession === 'date-asc' ? a.date - b.date : b.date - a.date);
+    arr.sort((a, b) =>
+      sortSession === 'date-asc' ? a.date - b.date : b.date - a.date
+    );
   }
 
-  renderQueue = arr;
-  renderIndex = 0;
-  renderNextChunk();
-
-  if (observer) observer.disconnect();
-  observer = new IntersectionObserver(entries => {
-    if (entries[0].isIntersecting) renderNextChunk();
-  });
-  observer.observe(document.getElementById('scroll-anchor'));
-}
-
-function renderNextChunk() {
-  const c = document.getElementById('song-list');
-  let count = 0;
-
-  while (renderIndex < renderQueue.length && count < 100) {
-    const sess = renderQueue[renderIndex++];
+  arr.forEach(sess => {
     const h5 = document.createElement('h5');
     h5.className = 'mt-4';
     h5.textContent = sess.label;
@@ -184,12 +224,11 @@ function renderNextChunk() {
 
     const row = document.createElement('div');
     row.className = 'row g-3 mb-3';
-    sess.items.sort((a, b) => Number(a['開始秒数'] || 0) - Number(b['開始秒数'] || 0))
+    sess.items
+      .sort((a, b) => Number(a['開始秒数']||0) - Number(b['開始秒数']||0))
       .forEach(s => row.appendChild(createCardCol(s)));
     c.appendChild(row);
-
-    count += sess.items.length;
-  }
+  });
 }
 
 function renderGrouped(songs) {
@@ -211,26 +250,20 @@ function renderGrouped(songs) {
         [list[i], list[j]] = [list[j], list[i]];
       }
     } else {
-      list.sort((a, b) => {
-        const da = new Date(a['日付']), db = new Date(b['日付']);
-        return sortSession === 'date-asc' ? da - db : db - da;
-      });
+      list.sort((a, b) => new Date(a['日付']) - new Date(b['日付']));
+      if (sortSession === 'date-desc') list.reverse();
     }
     const repDate = new Date(list[0]['日付']);
     return { title, list, repDate };
   });
 
-  if (sortSession === 'random') {
-    for (let i = groupArr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [groupArr[i], groupArr[j]] = [groupArr[j], groupArr[i]];
-    }
-  } else {
+  if (sortSession !== 'random') {
     groupArr.sort((a, b) => sortSession === 'date-asc' ? a.repDate - b.repDate : b.repDate - a.repDate);
   }
 
   groupArr.forEach(({ title, list }, i) => {
     const id = `grp${i}`;
+    const label = `${title} (${list.length} ${currentLang === 'ja' ? '件' : 'items'})`;
     const item = document.createElement('div');
     item.className = 'accordion-item';
     item.innerHTML = `
@@ -238,10 +271,11 @@ function renderGrouped(songs) {
         <button class="accordion-button collapsed" type="button"
                 data-bs-toggle="collapse" data-bs-target="#collapse-${id}"
                 aria-expanded="false" aria-controls="collapse-${id}">
-          ${title} （${list.length}件）
+          ${label}
         </button>
       </h2>
-      <div id="collapse-${id}" class="accordion-collapse collapse" data-bs-parent="#song-list">
+      <div id="collapse-${id}" class="accordion-collapse collapse"
+           data-bs-parent="#song-list">
         <div class="accordion-body p-0">
           <div class="row g-3 m-3">
             ${list.map(s => createCardCol(s).outerHTML).join('')}
@@ -253,28 +287,22 @@ function renderGrouped(songs) {
 }
 
 function createCardCol(song) {
-  const title     = song['曲名'] || '（曲名なし）';
-  const dateDisp  = song['配信日'] || '';
+  const title = song['曲名'] || '（曲名なし）';
+  const dateDisp = song['配信日'] || '';
   const sessTitle = song['配信タイトル'] || '';
-  const note      = song['備考'] || '';
-  const timeLink  = song['リンク'] || '';
-  const origLink  = song['配信URL'] || '';
-  const thumb     = song['ThumbnailURL'] || '';
+  const note = song['備考'] || '';
+  const timeLink = song['リンク'] || '';
+  const origLink = song['配信URL'] || '';
+  const thumb = song['ThumbnailURL'] || '';
 
   const imgWrap = thumb
-    ? `<div class="card-img-wrapper">
-         <img src="${thumb}" alt="${title}" loading="lazy">
-       </div>`
-    : '';
+    ? `<div class="card-img-wrapper"><img src="${thumb}" alt="${title}"></div>` : '';
   const playBtn = timeLink
-    ? `<a href="${timeLink}" target="_blank" class="btn btn-primary flex-fill">曲再生スタート</a>`
-    : '';
+    ? `<a href="${timeLink}" target="_blank" class="btn btn-primary flex-fill">${i18n[currentLang].play}</a>` : '';
   const origBtn = origLink
-    ? `<a href="${origLink}" target="_blank" class="btn btn-secondary flex-fill">元配信リンク</a>`
-    : '';
+    ? `<a href="${origLink}" target="_blank" class="btn btn-secondary flex-fill">${i18n[currentLang].link}</a>` : '';
   const noteHtml = note
-    ? `<p class="text-muted mb-2">${note}</p>`
-    : '';
+    ? `<p class="text-muted mb-2">${note}</p>` : '';
 
   const col = document.createElement('div');
   col.className = 'col-12 col-sm-6 col-md-4';
@@ -289,7 +317,7 @@ function createCardCol(song) {
         ${noteHtml}
         <div class="mt-auto d-flex gap-2">
           ${playBtn}${origBtn}
-          ${!playBtn && !origBtn ? '<span class="text-secondary">情報なし</span>' : ''}
+          ${!playBtn && !origBtn ? '<span class="text-secondary">' + i18n[currentLang].unknown + '</span>' : ''}
         </div>
       </div>
     </div>`;

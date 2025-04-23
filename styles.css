@@ -1,6 +1,3 @@
-/* styles.css */
-
-/* カラー変数 */
 :root {
     --primary-accent:   #FF8000;
     --secondary-accent: #3366CC;
@@ -8,13 +5,34 @@
     --text-base:        #000000;
   }
   
-  /* 全体 */
   body {
     background-color: var(--bg-base);
     color: var(--text-base);
   }
   
-  /* ボタンカラー */
+  /* タイトル装飾 */
+  h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--primary-accent);
+    text-align: center;
+    margin-bottom: 0.5rem;
+    border-bottom: 3px solid var(--secondary-accent);
+    display: block;
+    max-width: 100%;
+    padding-bottom: 0.3rem;
+    word-break: keep-all;
+    text-wrap: balance;
+  }
+  h1 small {
+    display: block;
+    font-size: 1.1rem;
+    color: var(--secondary-accent);
+    font-weight: 500;
+    margin-top: 0.3rem;
+  }
+  
+  /* ボタン */
   .btn-primary {
     background-color: var(--primary-accent) !important;
     border-color:     var(--primary-accent) !important;
@@ -31,13 +49,7 @@
     font-size: 0.95rem;
   }
   
-  /* アコーディオン開閉ヘッダー */
-  .accordion-button:not(.collapsed) {
-    background-color: var(--primary-accent);
-    color: #fff;
-  }
-  
-  /* 曲名アコーディオンヘッダーの視認性強化 */
+  /* アコーディオン */
   .accordion-button {
     font-weight: bold;
     font-size: 1.05rem;
@@ -53,16 +65,35 @@
     border-bottom: 1px solid #eee;
   }
   
-  /* フォーカス時 */
+  /* カード */
+  .card-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #000;
+  }
+  .card-body .text-muted {
+    font-size: 0.8rem;
+    color: #666;
+  }
+  .card-img-wrapper {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%;
+    overflow: hidden;
+  }
+  .card-img-wrapper img {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: auto; height: 100%;
+    transform: translate(-50%, -50%);
+    object-fit: cover;
+  }
+  
+  /* 入力フォーカス */
   .form-select:focus,
   .form-control:focus {
     border-color: var(--primary-accent);
     box-shadow: 0 0 0 0.2rem rgba(255,128,0,0.25);
-  }
-  
-  /* リンクホバー */
-  a:hover {
-    color: var(--primary-accent);
   }
   
   /* フィルタバー */
@@ -99,7 +130,7 @@
     }
   }
   
-  /* モバイル：縦並び */
+  /* モバイル */
   @media (max-width: 575.98px) {
     .filter-bar {
       flex-direction: column;
@@ -111,7 +142,6 @@
     .filter-item.reset button {
       width: 100%;
     }
-  
     #song-list .row {
       display: block;
     }
@@ -121,56 +151,21 @@
       width: 100% !important;
       margin-bottom: 1rem;
     }
-  
     h1 {
-      font-size: 1.6rem;
+      font-size: 1.5rem;
     }
     h1 small {
-      font-size: 1rem;
+      font-size: 0.95rem;
     }
     .card-title {
       font-size: 1.05rem;
     }
-    .btn-primary,
-    .btn-secondary {
+    .btn-primary, .btn-secondary {
       font-size: 0.95rem;
       padding: 0.5rem;
     }
     .filter-item label {
       font-size: 0.85rem;
     }
-  }
-  
-  /* サイトタイトル装飾強化（多言語併記対応） */
-  h1 {
-    font-size: 2rem;
-    font-weight: bold;
-    color: var(--primary-accent);
-    text-align: center;
-    margin-bottom: 0.5rem;
-    border-bottom: 3px solid var(--secondary-accent);
-    display: block;
-    max-width: 100%;
-    padding-bottom: 0.3rem;
-    word-break: keep-all;
-    text-wrap: balance;
-  }
-  h1 small {
-    display: block;
-    font-size: 1.1rem;
-    color: var(--secondary-accent);
-    font-weight: 500;
-    margin-top: 0.3rem;
-  }
-  
-  /* カード要素 */
-  .card-title {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #000;
-  }
-  .card-body .text-muted {
-    font-size: 0.8rem;
-    color: #666;
   }
   
