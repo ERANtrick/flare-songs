@@ -8,27 +8,20 @@
   <!-- OGP / SEO Meta Tags -->
   <meta name="keywords" content="不知火フレア, ホロライブ, 歌枠, フレア MV, フレア 歌一覧, Flare Songs, hololive" />
   <meta name="author" content="ERAN🔥" />
-  <!-- Open Graph -->
   <meta property="og:title" content="不知火フレア 歌一覧まとめ | Jump to Flare's Live & MVs" />
   <meta property="og:description" content="不知火フレアさんのYouTube歌枠やMVを、頭出しリンク付きで一覧化。気になる曲をすぐに再生できるファンサイトです。" />
   <meta property="og:url" content="https://erantrick.github.io/flare-songs/" />
   <meta property="og:type" content="website" />
-  <!-- Twitter Card -->
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="不知火フレア 歌一覧まとめ" />
   <meta name="twitter:description" content="フレアさんの歌声がすぐ聴ける、頭出しリンク付き一覧サイト。" />
   <meta name="twitter:site" content="@eran_trick" />
 
   <!-- Bootstrap CSS -->
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-  />
-
-  <!-- 自作スタイル -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 
-  <!-- サムネイル中央クロップ用スタイル -->
+  <!-- カスタムスタイル強化 -->
   <style>
     .card-img-wrapper {
       position: relative;
@@ -42,6 +35,55 @@
       width: auto; height: 100%;
       transform: translate(-50%, -50%);
       object-fit: cover;
+    }
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #000;
+    }
+    .btn-primary {
+      font-weight: bold;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    }
+    .btn-secondary {
+      opacity: 0.85;
+    }
+    .card-body .text-muted {
+      font-size: 0.8rem;
+      color: #666;
+    }
+    h1 {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: var(--primary-accent);
+    }
+    h1 small {
+      display: block;
+      font-size: 1rem;
+      color: var(--secondary-accent);
+    }
+
+    /* モバイル最適化 */
+    @media (max-width: 575.98px) {
+      h1 {
+        font-size: 1.5rem;
+      }
+      h1 small {
+        font-size: 0.95rem;
+      }
+      .card-title {
+        font-size: 1.05rem;
+      }
+      .btn-primary, .btn-secondary {
+        font-size: 0.95rem;
+        padding: 0.5rem;
+      }
+      .filter-bar {
+        gap: 0.75rem;
+      }
+      .filter-item label {
+        font-size: 0.85rem;
+      }
     }
   </style>
 
@@ -57,7 +99,6 @@
 
     <!-- ▼ フィルタ＆並び替えエリア -->
     <div class="mb-4 filter-bar">
-      <!-- 表示モード -->
       <div class="filter-item">
         <label for="mode-select" class="form-label small">表示モード</label>
         <select id="mode-select" class="form-select form-select-sm">
@@ -65,46 +106,29 @@
           <option value="song">曲名一覧 | Song List</option>
         </select>
       </div>
-
-      <!-- セッション絞り込み -->
       <div class="filter-item">
         <label for="session-select" class="form-label small">配信を選択</label>
         <select id="session-select" class="form-select form-select-sm">
           <option value="">すべての配信</option>
         </select>
       </div>
-
-      <!-- カテゴリ絞り込み -->
       <div class="filter-item">
         <label for="category-select" class="form-label small">カテゴリ</label>
         <select id="category-select" class="form-select form-select-sm">
           <option value="">すべて</option>
         </select>
       </div>
-
-      <!-- 配信枠並び替え -->
       <div class="filter-item">
         <label for="sort-session" class="form-label small">配信枠並び替え</label>
         <select id="sort-session" class="form-select form-select-sm"></select>
       </div>
-
-      <!-- 曲名検索（ここだけ自動で伸びる） -->
       <div class="filter-item keyword">
         <label for="search-input" class="form-label small">曲名で絞り込み</label>
-        <input
-          type="text"
-          id="search-input"
-          class="form-control form-control-sm"
-          placeholder="キーワード..."
-        />
+        <input type="text" id="search-input" class="form-control form-control-sm" placeholder="キーワード..." />
       </div>
-
-      <!-- リセット -->
       <div class="filter-item reset">
         <label class="form-label small invisible">リセット</label>
-        <button id="reset-btn" class="btn btn-outline-secondary btn-sm">
-          リセット
-        </button>
+        <button id="reset-btn" class="btn btn-outline-secondary btn-sm">リセット</button>
       </div>
     </div>
 
@@ -112,17 +136,12 @@
     <div id="song-list" class="accordion"></div>
   </div>
 
-  <!-- song-list の末尾で IntersectionObserver が監視するアンカー -->
   <div id="scroll-anchor" style="height: 1px;"></div>
 
   <!-- Bootstrap JS -->
-  <script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-  ></script>
-  <!-- 自作スクリプト -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="script.js"></script>
 
-  <!-- フッター -->
   <footer class="text-center text-muted mt-5 py-3 border-top small">
     <p>このサイトは <a href="https://x.com/eran_trick" target="_blank">ERAN🔥</a> によって作成・運営されています。</p>
     <p>ご意見・ご要望などありましたらお気軽にご連絡ください。</p>
