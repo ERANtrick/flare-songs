@@ -1,10 +1,14 @@
 // script.js
 
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS1O8_fE8vDDkvocXwcSIEAtF8eyxH-Jq_-6Wu09RCO1Y0AG7dfXYGsgjtJCCAqaJ37IX9YF23lZ3Ns/pub?output=csv';
-
 let allSongs = [];
-let currentSort = 'date-desc';
-let allCategories = [];  // 後でユニークカテゴリを保持
+
+// 配信枠並び替えオプション
+const sessionSortOpts = [
+  { value: 'date-desc', text: '配信日順（新しい順）' },
+  { value: 'date-asc',  text: '配信日順（古い順）' },
+  { value: 'random',    text: 'ランダム' }
+];
 
 window.addEventListener('DOMContentLoaded', () => {
   Papa.parse(CSV_URL, {
@@ -12,326 +16,240 @@ window.addEventListener('DOMContentLoaded', () => {
     header: true,
     complete: ({ data }) => {
       allSongs = data;
-      initSession();  // 配信セッション選択肢作成
-      initSort();     // 並び替えリスナー
-      initSearch();   // 検索リスナー
-      initReset();    // リセットリスナー
-      initCategory();  // カテゴリ
-      applyView();    // 初期表示
-    },
-    error: err => console.error(err)
+      initModeSelect();
+      initSessionSelect();
+      initSortSelect();
+      initSearch();
+      initReset();
+      applyView();
+    }
   });
 });
 
-/**
- * 配信セッション選択肢を
- * 「日付」列を使って新しい順に並べて生成する initSession()
- */
-function initSession() {
-    const sel = document.getElementById('session-select');
-  
-    // ① publicSongs: 「公開」フラグがあるものだけ
-    const publicSongs = allSongs.filter(s => s['公開'] === '公開');
-  
-    // ② セッションごとに最新の日付とラベルを保持するマップ
-    const sessionsMap = publicSongs.reduce((acc, song) => {
-      const url      = song['配信URL'];
-      const label    = `${song['日付']} ｜ ${song['配信タイトル']}`;
-      const dt       = new Date(song['日付']);
-      if (!acc[url] || dt > acc[url].date) {
-        acc[url] = { date: dt, label };
-      }
-      return acc;
-    }, {});
-  
-    // ③ 配列化＆新しい順ソート
-    const sessionsArr = Object.entries(sessionsMap)
-      .map(([url, { date, label }]) => ({ url, date, label }))
-      .sort((a, b) => b.date - a.date);
-  
-    // ④ ドロップダウンに反映（公開セッションのみ）
-    sel.innerHTML = '<option value="">すべての配信</option>';
-    sessionsArr.forEach(({ url, label }) => {
-      const opt = document.createElement('option');
-      opt.value       = url;
-      opt.textContent = label;
-      sel.appendChild(opt);
-    });
-  
-    // ⑤ 選択時リスナー
-    sel.addEventListener('change', () => {
-      document.getElementById('search-input').value = '';
-      applyView();
-    });
-  }
-  
+function initModeSelect() {
+  document.getElementById('mode-select')
+    .addEventListener('change', applyView);
+}
 
-function initSort() {
-  const sel = document.getElementById('sort-select');
-  sel.addEventListener('change', () => {
-    currentSort = sel.value;
-    applyView();
+function initSessionSelect() {
+  const sel = document.getElementById('session-select');
+  const map = allSongs.reduce((acc, s) => {
+    if (s['公開'] !== '公開') return acc;
+    const key = s['配信URL'];
+    const dt  = new Date(s['日付']);
+    if (!acc[key] || dt > acc[key].date) {
+      acc[key] = { date: dt, label: `${s['配信日']} ｜ ${s['配信タイトル']}` };
+    }
+    return acc;
+  }, {});
+  const arr = Object.entries(map)
+    .map(([url,o])=>({ url, label:o.label, date:o.date }))
+    .sort((a,b)=> b.date - a.date);
+
+  sel.innerHTML = '<option value="">すべての配信</option>';
+  arr.forEach(o=>{
+    const opt = document.createElement('option');
+    opt.value = o.url;
+    opt.textContent = o.label;
+    sel.appendChild(opt);
   });
+  sel.addEventListener('change', applyView);
+}
+
+function initSortSelect() {
+  const ss = document.getElementById('sort-session');
+  sessionSortOpts.forEach(o=>{
+    const opt = document.createElement('option');
+    opt.value = o.value;
+    opt.textContent = o.text;
+    ss.appendChild(opt);
+  });
+  ss.value = sessionSortOpts[0].value;
+  ss.addEventListener('change', applyView);
 }
 
 function initSearch() {
-  const input = document.getElementById('search-input');
-  input.addEventListener('input', () => {
-    applyView();
-  });
+  document.getElementById('search-input')
+    .addEventListener('input', applyView);
 }
 
 function initReset() {
-  const btn = document.getElementById('reset-btn');
-  btn.addEventListener('click', () => {
-    document.getElementById('session-select').value = '';
-    document.getElementById('sort-select').value    = 'date-desc';
-    currentSort = 'date-desc';
-    document.getElementById('search-input').value   = '';
-    applyView();
-  });
-}
-
-function initCategory() {
-    const sel = document.getElementById('category-select');
-    // 1) 全データから Category を抽出・ユニーク化
-    const cats = [...new Set(allSongs.map(s => s['Category']).filter(Boolean))];
-    allCategories = cats;
-    // 2) <option> を追加
-    cats.forEach(cat => {
-      const opt = document.createElement('option');
-      opt.value       = cat;
-      opt.textContent = cat;
-      sel.appendChild(opt);
-    });
-    // 3) 選択時に画面更新
-    sel.addEventListener('change', () => {
+  document.getElementById('reset-btn')
+    .addEventListener('click', () => {
+      document.getElementById('mode-select').value    = 'session';
+      document.getElementById('session-select').value = '';
+      document.getElementById('sort-session').value   = sessionSortOpts[0].value;
+      document.getElementById('search-input').value   = '';
       applyView();
     });
-  }
-
-
-
-/**
- * 画面の状態（セッション選択／カテゴリ／検索キーワード／ソート）に応じてビューを更新
- */
-function applyView() {
-    // ① 並び替えセレクトの状態を反映
-    currentSort = document.getElementById('sort-select').value;
-  
-    // ② 各入力値を取得
-    const sessionVal  = document.getElementById('session-select').value;
-    const categoryVal = document.getElementById('category-select').value;
-    const kw          = document.getElementById('search-input').value.trim().toLowerCase();
-  
-    // ── モード判定 & class 切り替え ─────────────────
-    const container = document.getElementById('song-list');
-    if (!kw) {
-      // 検索キーワードなし＝一覧モード
-      container.classList.add('session-view');
-    } else {
-      // キーワードあり＝グループ（アコーディオン）モード
-      container.classList.remove('session-view');
-    }
-    // ────────────────────────────────────────────────
-  
-    // ③ 全データをコピーしてフィルタ開始
-    let list = [...allSongs];
-  
-    // ④ 「公開」フラグが '公開' のものだけ残す
-    list = list.filter(song => song['公開'] === '公開');
-  
-    // ⑤ 各種フィルタ
-    if (sessionVal)  list = list.filter(s => s['配信URL'] === sessionVal);
-    if (categoryVal) list = list.filter(s => s['Category'] === categoryVal);
-    if (kw)          list = list.filter(s => (s['曲名']||'').toLowerCase().includes(kw));
-  
-    // ⑥ ソート適用
-    list = sortSongs(list);
-  
-    // ⑦ 公開コンテンツが一件もない場合はメッセージ表示して終了
-    if (list.length === 0) {
-      container.innerHTML = `
-        <div class="alert alert-warning" role="alert">
-          公開中のコンテンツがありません。
-        </div>
-      `;
-      return;
-    }
-  
-    // ⑧ 表示切り替え
-    if (kw) {
-      renderGrouped(list);
-    } else {
-      renderBySession(list);
-    }
-  }
-
-/**
- * currentSort に応じて songs をソートして返す
- * ※ 日付ソートには「日付」列 (YYYY/MM/DD) を使う
- */
-function sortSongs(songs) {
-  // 曲名順
-  if (currentSort === 'title') {
-    return songs.sort((a, b) =>
-      (a['曲名'] || '').localeCompare(b['曲名'] || '', 'ja')
-    );
-  }
-
-  // ランダム
-  if (currentSort === 'random') {
-    for (let i = songs.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [songs[i], songs[j]] = [songs[j], songs[i]];
-    }
-    return songs;
-  }
-
-  // 配信日順（新しい順 / 古い順）
-  return songs.sort((a, b) => {
-    const da = new Date(a['日付']);
-    const db = new Date(b['日付']);
-    return currentSort === 'date-asc'
-      ? da - db  // 古い順
-      : db - da; // 新しい順
-  });
 }
 
-function renderBySession(songs) {
-  const container = document.getElementById('song-list');
-  container.innerHTML = '';
+function applyView() {
+  const mode        = document.getElementById('mode-select').value;
+  const sessionVal  = document.getElementById('session-select').value;
+  const sortSession = document.getElementById('sort-session').value;
+  const kw          = document.getElementById('search-input').value.trim().toLowerCase();
 
-  const sessions = songs.reduce((acc, song) => {
-    const key = song['配信URL'];
-    if (!acc[key]) {
-      acc[key] = {
-        date:  song['配信日'],
-        title: song['配信タイトル'],
+  // 1) 公開フィルタ
+  let list = allSongs.filter(s => s['公開'] === '公開');
+
+  // 2) セッション絞り込み
+  if (sessionVal) list = list.filter(s => s['配信URL'] === sessionVal);
+
+  // 3) 曲名絞り込み
+  if (kw) list = list.filter(s => (s['曲名']||'').toLowerCase().includes(kw));
+
+  // 4) レンダリング
+  if (mode === 'session' && !kw) {
+    renderBySession(list, sortSession);
+  } else {
+    renderGrouped(list);
+  }
+}
+
+// 配信枠表示（絞り込みなし）
+function renderBySession(songs, sortSession) {
+  const c = document.getElementById('song-list');
+  c.innerHTML = '';
+  c.classList.remove('accordion');
+
+  // セッションごとにまとめる
+  const groups = songs.reduce((acc, s) => {
+    const k = s['配信URL'];
+    if (!acc[k]) {
+      acc[k] = {
+        date:  new Date(s['日付']),
+        label: `${s['配信日']} ｜ ${s['配信タイトル']}`,
         items: []
       };
     }
-    acc[key].items.push(song);
+    acc[k].items.push(s);
     return acc;
   }, {});
 
-  Object.values(sessions).forEach(sess => {
-    const h = document.createElement('h5');
-    h.className = 'mt-4';
-    h.textContent = `${sess.date} ｜ ${sess.title}`;
-    container.appendChild(h);
+  // 配列化＆並び替え
+  let arr = Object.values(groups);
+  if (sortSession === 'random') {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+  } else {
+    arr.sort((a, b) =>
+      sortSession === 'date-asc'
+        ? a.date - b.date
+        : b.date - a.date
+    );
+  }
+
+  // 描画
+  arr.forEach(sess => {
+    const h5 = document.createElement('h5');
+    h5.className = 'mt-4';
+    h5.textContent = sess.label;
+    c.appendChild(h5);
 
     const row = document.createElement('div');
     row.className = 'row g-3 mb-3';
     sess.items
-      .sort((a, b) => (parseInt(a['開始秒数']||0) - parseInt(b['開始秒数']||0)))
-      .forEach(song => row.appendChild(createCardCol(song)));
-    container.appendChild(row);
+      .sort((a, b) => Number(a['開始秒数']||0) - Number(b['開始秒数']||0))
+      .forEach(s => row.appendChild(createCardCol(s)));
+    c.appendChild(row);
   });
 }
 
+// 曲名表示 or 絞り込み時はアコーディオン
 function renderGrouped(songs) {
-  const container = document.getElementById('song-list');
-  container.innerHTML = '';
-  container.classList.add('accordion');
+  const c = document.getElementById('song-list');
+  c.innerHTML = '';
+  c.classList.add('accordion');
 
-  const groups = songs.reduce((acc, song) => {
-    const t = song['曲名'] || '（曲名なし）';
-    (acc[t] ||= []).push(song);
+  // 今の配信枠並び替え値を取得
+  const sortSession = document.getElementById('sort-session').value;
+
+  // 曲名ごとにまとめる
+  const groups = songs.reduce((acc, s) => {
+    const t = s['曲名']||'（曲名なし）';
+    (acc[t] ||= []).push(s);
     return acc;
   }, {});
 
-  Object.entries(groups).forEach(([title, list], idx) => {
-    const safeId = `grp${idx}`;
+  Object.entries(groups).forEach(([title, list], i) => {
+    // ── 各グループ内を「配信枠並び替え」でソート／シャッフル ──
+    if (sortSession === 'random') {
+      for (let j = list.length - 1; j > 0; j--) {
+        const k = Math.floor(Math.random() * (j + 1));
+        [list[j], list[k]] = [list[k], list[j]];
+      }
+    } else {
+      list.sort((a, b) => {
+        const da = new Date(a['日付']), db = new Date(b['日付']);
+        return sortSession === 'date-asc' ? da - db : db - da;
+      });
+    }
+    // ───────────────────────────────────────────────────────
+
+    const id = `grp${i}`;
     const item = document.createElement('div');
     item.className = 'accordion-item';
-
-    const header = document.createElement('h2');
-    header.className = 'accordion-header';
-    header.id = `heading-${safeId}`;
-
-    const btn = document.createElement('button');
-    btn.className = 'accordion-button collapsed';
-    btn.type = 'button';
-    btn.setAttribute('data-bs-toggle', 'collapse');
-    btn.setAttribute('data-bs-target', `#collapse-${safeId}`);
-    btn.setAttribute('aria-expanded', 'false');
-    btn.setAttribute('aria-controls', `collapse-${safeId}`);
-    btn.textContent = `${title} （${list.length}件）`;
-
-    header.appendChild(btn);
-    item.appendChild(header);
-
-    const collapseDiv = document.createElement('div');
-    collapseDiv.id = `collapse-${safeId}`;
-    collapseDiv.className = 'accordion-collapse collapse';
-    collapseDiv.setAttribute('aria-labelledby', `heading-${safeId}`);
-    collapseDiv.setAttribute('data-bs-parent', '#song-list');
-
-    const body = document.createElement('div');
-    body.className = 'accordion-body';
-
-    const row = document.createElement('div');
-    row.className = 'row g-3 mb-3';
-    sortSongs(list).forEach(song => row.appendChild(createCardCol(song)));
-
-    body.appendChild(row);
-    collapseDiv.appendChild(body);
-    item.appendChild(collapseDiv);
-    container.appendChild(item);
+    item.innerHTML = `
+      <h2 class="accordion-header" id="heading-${id}">
+        <button class="accordion-button collapsed" type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#collapse-${id}"
+          aria-expanded="false"
+          aria-controls="collapse-${id}">
+          ${title} （${list.length}件）
+        </button>
+      </h2>
+      <div id="collapse-${id}" class="accordion-collapse collapse"
+           data-bs-parent="#song-list">
+        <div class="accordion-body p-0">
+          <div class="row g-3 m-3">
+            ${list.map(s => createCardCol(s).outerHTML).join('')}
+          </div>
+        </div>
+      </div>`;
+    c.appendChild(item);
   });
 }
 
-/**
- * １曲分のカード要素を返す共通関数（CSSクロップ版）
- */
 function createCardCol(song) {
-    const title        = song['曲名'] || '（曲名なし）';
-    const date         = song['日付'] || '';
-    const sessionTitle = song['配信タイトル'] || '';
-    const note         = song['備考'] || '';
-    const timeLink     = song['リンク'] || '';
-    const origLink     = song['配信URL'] || '';
-    const thumbUrl     = song['ThumbnailURL'] || '';
-  
-    // サムネイルラッパー
-    const imgWrapper = thumbUrl
-      ? `<div class="card-img-wrapper">
-           <img src="${thumbUrl}" alt="${title} thumbnail">
-         </div>`
-      : '';
-  
-    const col = document.createElement('div');
-    col.className = 'col-12 col-sm-6 col-md-4';
-    col.innerHTML = `
-      <div class="card h-100">
-        ${imgWrapper}
-        <div class="card-body d-flex flex-column">
-          <h5 class="card-title">${title}</h5>
-          <p class="text-muted mb-2" style="font-size:0.9rem">
-            ${date}${sessionTitle ? ' ｜ ' + sessionTitle : ''}
-          </p>
-          ${note ? `<p class="text-muted mb-2">${note}</p>` : ''}
-          <div class="mt-auto d-flex gap-2">
-            ${timeLink
-              ? `<a href="${timeLink}" target="_blank" class="btn btn-primary flex-fill">
-                   曲再生スタート
-                 </a>`
-              : ''
-            }
-            ${origLink
-              ? `<a href="${origLink}" target="_blank" class="btn btn-secondary flex-fill">
-                   元配信リンク
-                 </a>`
-              : ''
-            }
-            ${!timeLink && !origLink
-              ? `<span class="text-secondary">情報なし</span>`
-              : ''
-            }
-          </div>
+  const title     = song['曲名']||'（曲名なし）';
+  const dateDisp  = song['配信日']||'';
+  const sessTitle = song['配信タイトル']||'';
+  const note      = song['備考']||'';
+  const timeLink  = song['リンク']||'';
+  const origLink  = song['配信URL']||'';
+  const thumb     = song['ThumbnailURL']||'';
+
+  const imgWrap = thumb
+    ? `<div class="card-img-wrapper"><img src="${thumb}" alt="${title}"></div>`
+    : '';
+  const playBtn = timeLink
+    ? `<a href="${timeLink}" target="_blank" class="btn btn-primary flex-fill">曲再生スタート</a>`
+    : '';
+  const origBtn = origLink
+    ? `<a href="${origLink}" target="_blank" class="btn btn-secondary flex-fill">元配信リンク</a>`
+    : '';
+  const noteHtml = note ? `<p class="text-muted mb-2">${note}</p>` : '';
+
+  const col = document.createElement('div');
+  col.className = 'col-12 col-sm-6 col-md-4';
+  col.innerHTML = `
+    <div class="card h-100">
+      ${imgWrap}
+      <div class="card-body d-flex flex-column">
+        <h5 class="card-title">${title}</h5>
+        <p class="text-muted mb-2" style="font-size:0.9rem">
+          ${dateDisp}${sessTitle ? ' ｜ ' + sessTitle : ''}
+        </p>
+        ${noteHtml}
+        <div class="mt-auto d-flex gap-2">
+          ${playBtn}${origBtn}
+          ${!playBtn && !origBtn ? '<span class="text-secondary">情報なし</span>' : ''}
         </div>
       </div>
-    `;
-    return col;
-  }
+    </div>`;
+  return col;
+}

@@ -1,75 +1,62 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>不知火フレア 歌枠＆MV 一覧サイト | Jump to Flare’s Live & MVs</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>不知火フレア 歌枠＆MV 一覧サイト | Jump to Flare’s Live & MVs</title>
   <meta
-  name="description"
-  content="不知火フレアさんのYouTube歌枠やMVを頭出しリンク付きで一覧化。Jump to Flare’s Live & MVsで好みの楽曲へすぐアクセス！"
-/>
-  <!-- Bootstrap CSS -->
+    name="description"
+    content="不知火フレアさんのYouTube歌枠やMVを頭出しリンク付きで一覧化。Jump to Flare’s Live & MVsで好みの楽曲へすぐアクセス！"
+  />
   <link
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
     rel="stylesheet"
-  >
-  <!-- PapaParse -->
+  />
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
-
-
-
-</head>
-
-<style>
-    /* カード内サムネイルをラップするラッパー */
+  <style>
     .card-img-wrapper {
       position: relative;
       width: 100%;
-      /* 16:9 のアスペクト比を維持 */
       padding-top: 56.25%;
       overflow: hidden;
     }
-  
-    /* ラッパー内の img を cover モードで中央クロップ */
     .card-img-wrapper img {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      /* カード幅いっぱい、高さはアスペクト比に合わせる */
-      width: auto;
-      height: 100%;
+      top: 50%; left: 50%;
+      width: auto; height: 100%;
       transform: translate(-50%, -50%);
       object-fit: cover;
-      object-position: center;
     }
   </style>
-
+</head>
 <body>
   <div class="container py-4">
     <h1 class="mb-2">
-      不知火フレア 歌枠＆MV 一覧サイト
-      <br>
+      不知火フレア 歌枠＆MV 一覧サイト<br />
       <small class="text-muted">Jump to Flare’s Live &amp; MVs</small>
     </h1>
 
-    <!-- 配信セッション選択 -->
+    <!-- モード切替 -->
+    <div class="mb-3 d-flex align-items-center gap-2">
+      <label for="mode-select" class="m-0">表示モード:</label>
+      <select id="mode-select" class="form-select w-auto">
+        <option value="session">セッション表示</option>
+        <option value="song">曲名表示</option>
+      </select>
+    </div>
+
+    <!-- セッション絞り込み -->
     <div class="mb-3 d-flex align-items-center gap-2">
       <label for="session-select" class="m-0">配信を選択:</label>
       <select id="session-select" class="form-select w-auto">
         <option value="">すべての配信</option>
-        <!-- JS で動的に<option>を追加 -->
       </select>
     </div>
 
-    <!-- 並び替えセレクト -->
+    <!-- 配信枠並び替え -->
     <div class="mb-3 d-flex align-items-center gap-2">
-      <label for="sort-select" class="m-0">並び替え:</label>
-      <select id="sort-select" class="form-select w-auto">
-        <option value="date-desc">配信日順（新しい順）</option>
-        <option value="date-asc">配信日順（古い順）</option>
-        <option value="title">曲名順</option>
-        <option value="random">ランダム</option>
-      </select>
+      <label for="sort-session" class="m-0">配信枠並び替え:</label>
+      <select id="sort-session" class="form-select w-auto"></select>
     </div>
 
     <!-- 検索ボックス -->
@@ -87,24 +74,13 @@
       リセット
     </button>
 
-<!-- 並び替え／リセット部の下あたりに挿入 -->
-<div class="mb-3 d-flex align-items-center gap-2">
-    <label for="category-select" class="m-0">カテゴリ:</label>
-    <select id="category-select" class="form-select w-auto">
-      <option value="">すべて</option>
-      <!-- JSで動的に<option>を追加 -->
-    </select>
-  </div>
-
     <!-- 曲リスト表示領域 -->
     <div id="song-list" class="accordion"></div>
   </div>
 
-  <!-- 自作スクリプト -->
-  <script src="script.js"></script>
-  <!-- Bootstrap JS -->
   <script
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
   ></script>
+  <script src="script.js"></script>
 </body>
 </html>
