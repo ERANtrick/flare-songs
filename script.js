@@ -181,45 +181,71 @@ function renderBySession(songs, sortSession) {
   });
 }
 
+/**
+ * 曲名表示モード or 絞り込み時のアコーディオン表示
+ * グループ順も、展開時のリスト順も配信枠並び替え通りに
+ */
 function renderGrouped(songs) {
   const c = document.getElementById('song-list');
   c.innerHTML = '';
   c.classList.add('accordion');
 
+  // 今の「配信枠並び替え」選択値を取得
   const sortSession = document.getElementById('sort-session').value;
+
+  // 1) 曲名ごとにグループ化
   const groups = songs.reduce((acc, s) => {
-    const t = s['曲名']||'（曲名なし）';
+    const t = s['曲名'] || '（曲名なし）';
     (acc[t] ||= []).push(s);
     return acc;
   }, {});
 
-  Object.entries(groups).forEach(([title, list], i) => {
-    // グループ内の配信枠並び替え or シャッフル
+  // 2) 各グループ内を配信枠並び替えに従ってソート、かつグループの代表日を取得
+  const groupArr = Object.entries(groups).map(([title, list]) => {
+    // グループ内ソート or シャッフル
     if (sortSession === 'random') {
-      for (let j = list.length - 1; j > 0; j--) {
-        const k = Math.floor(Math.random() * (j + 1));
-        [list[j], list[k]] = [list[k], list[j]];
+      for (let i = list.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [list[i], list[j]] = [list[j], list[i]];
       }
     } else {
       list.sort((a, b) => {
         const da = new Date(a['日付']), db = new Date(b['日付']);
-        return sortSession === 'date-asc'
-          ? da - db
-          : db - da;
+        return sortSession === 'date-asc' ? da - db : db - da;
       });
     }
+    // 代表日としてグループ内最初の要素の日付を使う
+    const repDate = new Date(list[0]['日付']);
+    return { title, list, repDate };
+  });
 
+  // 3) グループ順も同じく配信枠並び替えに従って
+  if (sortSession === 'random') {
+    for (let i = groupArr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [groupArr[i], groupArr[j]] = [groupArr[j], groupArr[i]];
+    }
+  } else {
+    groupArr.sort((a, b) =>
+      sortSession === 'date-asc'
+        ? a.repDate - b.repDate
+        : b.repDate - a.repDate
+    );
+  }
+
+  // 4) 描画
+  groupArr.forEach(({ title, list }, i) => {
     const id = `grp${i}`;
     const item = document.createElement('div');
     item.className = 'accordion-item';
     item.innerHTML = `
       <h2 class="accordion-header" id="heading-${id}">
         <button class="accordion-button collapsed"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#collapse-${id}"
-          aria-expanded="false"
-          aria-controls="collapse-${id}">
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapse-${id}"
+                aria-expanded="false"
+                aria-controls="collapse-${id}">
           ${title} （${list.length}件）
         </button>
       </h2>
