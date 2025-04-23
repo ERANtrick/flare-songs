@@ -37,19 +37,27 @@
     </h1>
 
     <!-- モード切替 -->
-    <div class="mb-3 d-flex align-items-center gap-2">
-      <label for="mode-select" class="m-0">表示モード:</label>
-      <select id="mode-select" class="form-select w-auto">
-        <option value="session">セッション表示</option>
-        <option value="song">曲名表示</option>
-      </select>
-    </div>
+<div class="mb-3 d-flex align-items-center gap-2">
+  <label for="mode-select" class="m-0">表示モード:</label>
+  <select id="mode-select" class="form-select w-auto">
+    <option value="session">配信枠一覧 | Stream Sessions</option>
+    <option value="song">曲名一覧 | Song List</option>
+  </select>
+</div>
 
     <!-- セッション絞り込み -->
     <div class="mb-3 d-flex align-items-center gap-2">
       <label for="session-select" class="m-0">配信を選択:</label>
       <select id="session-select" class="form-select w-auto">
         <option value="">すべての配信</option>
+      </select>
+    </div>
+
+    <!-- カテゴリ絞り込み -->
+    <div class="mb-3 d-flex align-items-center gap-2">
+      <label for="category-select" class="m-0">カテゴリ:</label>
+      <select id="category-select" class="form-select w-auto">
+        <option value="">すべて</option>
       </select>
     </div>
 
