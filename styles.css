@@ -12,7 +12,26 @@ body {
   color: var(--text-base);
 }
 
-/* ボタンカラー */
+/* タイトル */
+h1 {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--primary-accent);
+  text-align: center;
+  margin-bottom: 0.5rem;
+  border-bottom: 3px solid var(--secondary-accent);
+  display: inline-block;
+  padding-bottom: 0.3rem;
+}
+h1 small {
+  display: block;
+  font-size: 1rem;
+  color: var(--secondary-accent);
+  font-weight: normal;
+  margin-top: 0.3rem;
+}
+
+/* ボタン */
 .btn-primary {
   background-color: var(--primary-accent) !important;
   border-color:     var(--primary-accent) !important;
@@ -29,6 +48,60 @@ body {
   font-size: 0.95rem;
 }
 
+/* お気に入り切替ボタン */
+#fav-only-btn.active {
+  font-weight: bold;
+}
+
+/* お気に入りマーク */
+.fav-btn {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  color: #ccc;
+  z-index: 2;
+  cursor: pointer;
+  text-shadow: 0 0 2px #fff;
+  transition: color 0.2s ease;
+}
+.fav-btn:hover {
+  color: var(--primary-accent);
+}
+.fav-btn.active {
+  color: var(--primary-accent);
+}
+
+/* サムネイル */
+.card-img-wrapper {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%;
+  overflow: hidden;
+}
+.card-img-wrapper img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: auto;
+  height: 100%;
+  transform: translate(-50%, -50%);
+  object-fit: cover;
+}
+
+/* カード */
+.card-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #000;
+}
+.card-body .text-muted {
+  font-size: 0.8rem;
+  color: #666;
+}
+
 /* アコーディオン開閉ヘッダー */
 .accordion-button:not(.collapsed) {
   background-color: var(--primary-accent);
@@ -39,7 +112,7 @@ body {
 .form-select:focus,
 .form-control:focus {
   border-color: var(--primary-accent);
-  box-shadow: 0 0 0 0.2rem rgba(255,128,0,0.25);
+  box-shadow: 0 0 0 0.2rem rgba(255, 128, 0, 0.25);
 }
 
 /* リンクホバー */
@@ -69,14 +142,15 @@ a:hover {
     flex: 1 1 auto;
     min-width: 12rem;
   }
-  .filter-item.reset {
+  .filter-item.reset,
+  .filter-item.fav {
     flex: 0 0 auto;
     min-width: 6rem;
     align-self: flex-end;
   }
-  .filter-item:not(.keyword):not(.reset) select,
-  .filter-item:not(.keyword):not(.reset) input,
-  .filter-item:not(.keyword):not(.reset) button {
+  .filter-item:not(.keyword):not(.reset):not(.fav) select,
+  .filter-item:not(.keyword):not(.reset):not(.fav) input,
+  .filter-item:not(.keyword):not(.reset):not(.fav) button {
     width: auto;
   }
 }
@@ -90,7 +164,8 @@ a:hover {
   .filter-item {
     width: 100% !important;
   }
-  .filter-item.reset button {
+  .filter-item.reset button,
+  .filter-item.fav button {
     width: 100%;
   }
   #song-list .row {
@@ -118,92 +193,4 @@ a:hover {
   .filter-item label {
     font-size: 0.85rem;
   }
-}
-
-/* タイトル */
-h1 {
-  font-size: 2rem;
-  font-weight: bold;
-  color: var(--primary-accent);
-  text-align: center;
-  margin-bottom: 0.5rem;
-  border-bottom: 3px solid var(--secondary-accent);
-  display: inline-block;
-  padding-bottom: 0.3rem;
-}
-h1 small {
-  display: block;
-  font-size: 1rem;
-  color: var(--secondary-accent);
-  font-weight: normal;
-  margin-top: 0.3rem;
-}
-
-/* カード */
-.card-title {
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #000;
-}
-.card-body .text-muted {
-  font-size: 0.8rem;
-  color: #666;
-}
-
-/* サムネイルクロップ */
-.card-img-wrapper {
-  position: relative;
-  width: 100%;
-  padding-top: 56.25%;
-  overflow: hidden;
-}
-.card-img-wrapper img {
-  position: absolute;
-  top: 50%; left: 50%;
-  width: auto; height: 100%;
-  transform: translate(-50%, -50%);
-  object-fit: cover;
-}
-
-/* ☆ お気に入りボタン */
-.fav-btn {
-  position: absolute;
-  top: 0.25rem;
-  right: 0.5rem;
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid #ccc;
-  font-size: 1.4rem;
-  color: #888;
-  z-index: 2;
-  cursor: pointer;
-  padding: 0.1rem 0.4rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-  transition: color 0.2s ease, background 0.2s ease;
-}
-.fav-btn:hover {
-  color: var(--primary-accent);
-  background: #fff;
-}
-.fav-btn.active {
-  color: var(--primary-accent);
-  background: #fff;
-  border-color: var(--primary-accent);
-}
-
-/* お気に入りだけ表示ボタンのスタイル */
-#fav-only-btn {
-  font-weight: bold;
-  color: var(--primary-accent);
-  border-color: var(--primary-accent);
-  background-color: #fff;
-}
-#fav-only-btn:hover {
-  background-color: var(--primary-accent);
-  color: #fff;
-}
-#fav-only-btn.active {
-  background-color: var(--primary-accent);
-  color: #fff;
-  border-color: var(--primary-accent);
 }
