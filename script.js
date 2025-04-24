@@ -118,41 +118,72 @@ function createCardCol(song) {
   col.className = 'col-12 col-sm-6 col-md-4';
 
   const html = `
-  <div class="card h-100 position-relative">
-    ${img ? `<div class="card-img-wrapper">
-      <button class="fav-btn ${fav ? 'active' : ''}" data-link="${key}">${fav ? '★' : '☆'}</button>
-      <img src="${img}" alt="${title}" loading="lazy"></div>` : ''}
-    <div class="card-body d-flex flex-column">
-      <h5 class="card-title">${title}</h5>
-      <p class="text-muted mb-2" style="font-size:0.9rem">${date}${sess ? ' ｜ ' + sess : ''}</p>
-      ${note ? `<p class="text-muted mb-2">${note}</p>` : ''}
-      <div class="mt-auto d-flex gap-2">
-        ${link ? `<a href="${link}" class="btn btn-primary flex-fill" target="_blank">${i18n[currentLang].play}</a>` : ''}
-        ${url ? `<a href="${url}" class="btn btn-secondary flex-fill" target="_blank">${i18n[currentLang].link}</a>` : ''}
-        ${!link && !url ? `<span class="text-secondary">${i18n[currentLang].unknown}</span>` : ''}
+    <div class="card h-100 position-relative">
+      ${img ? `<div class="card-img-wrapper">
+        <button class="fav-btn ${fav ? 'active' : ''}" data-link="${key}">${fav ? '★' : '☆'}</button>
+        <img src="${img}" alt="${title}" loading="lazy"></div>` : ''}
+      <div class="card-body d-flex flex-column">
+        <h5 class="card-title">${title}</h5>
+        <p class="text-muted mb-2" style="font-size:0.9rem">${date}${sess ? ' ｜ ' + sess : ''}</p>
+        ${note ? `<p class="text-muted mb-2">${note}</p>` : ''}
+        <div class="mt-auto d-flex gap-2">
+          ${link ? `<a href="${link}" class="btn btn-primary flex-fill" target="_blank" data-track="play">${i18n[currentLang].play}</a>` : ''}
+          ${url  ? `<a href="${url}" class="btn btn-secondary flex-fill" target="_blank" data-track="orig">${i18n[currentLang].link}</a>` : ''}
+          ${!link && !url ? `<span class="text-secondary">${i18n[currentLang].unknown}</span>` : ''}
+        </div>
       </div>
-    </div>
-  </div>`;
+    </div>`;
   col.innerHTML = html;
 
-  const btn = col.querySelector('.fav-btn');
-  if (btn) {
-    btn.addEventListener('click', () => {
-      const link = btn.dataset.link;
+  // お気に入りボタン
+  const favBtn = col.querySelector('.fav-btn');
+  if (favBtn) {
+    favBtn.addEventListener('click', () => {
+      const link = favBtn.dataset.link;
       if (isFavorite(link)) {
         removeFavorite(link);
-        btn.classList.remove('active');
-        btn.textContent = '☆';
+        favBtn.classList.remove('active');
+        favBtn.textContent = '☆';
       } else {
         addFavorite(link);
-        btn.classList.add('active');
-        btn.textContent = '★';
+        favBtn.classList.add('active');
+        favBtn.textContent = '★';
+      }
+    });
+  }
+
+  // GAイベント送信
+  const playBtn = col.querySelector('[data-track="play"]');
+  if (playBtn) {
+    playBtn.addEventListener('click', () => {
+      if (typeof gtag === 'function') {
+        gtag('event', 'click_play', {
+          event_category: 'Song',
+          event_label: title,
+          session_title: sess,
+          link_url: link
+        });
+      }
+    });
+  }
+
+  const origBtn = col.querySelector('[data-track="orig"]');
+  if (origBtn) {
+    origBtn.addEventListener('click', () => {
+      if (typeof gtag === 'function') {
+        gtag('event', 'click_orig', {
+          event_category: 'Stream',
+          event_label: title,
+          session_title: sess,
+          link_url: url
+        });
       }
     });
   }
 
   return col;
 }
+
 
 function renderBySession(songs, sortKey) {
   const c = document.getElementById('song-list');
