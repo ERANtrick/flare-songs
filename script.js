@@ -91,11 +91,17 @@ function updateUILabels() {
   document.getElementById("reset-btn").textContent = t.reset;
   document.getElementById("mode-select").options[0].textContent = t.mode_session;
   document.getElementById("mode-select").options[1].textContent = t.mode_song;
-  document.getElementById("lang-label").textContent = i18n[currentLang].language;
+  document.getElementById("lang-label").textContent = t.language;
 
+  // お気に入りボタンの表示内容とクラスの統一（ここを追加）
   const favBtn = document.getElementById("fav-only-btn");
   favBtn.textContent = favOnlyMode ? t.fav_toggle_on : t.fav_toggle_off;
+
+  favBtn.classList.toggle("active", favOnlyMode);
+  favBtn.classList.toggle("btn-warning", favOnlyMode);
+  favBtn.classList.toggle("btn-outline-warning", !favOnlyMode);
 }
+
 
 function getFavorites() {
   return JSON.parse(localStorage.getItem('favorites') || '[]');
