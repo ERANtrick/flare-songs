@@ -10,6 +10,7 @@ const i18n = {
     sort: "配信枠並び替え",
     keyword: "曲名で絞り込み",
     reset: "リセット",
+    language: "言語",
     play: "曲再生スタート",
     link: "元配信リンク",
     unknown: "情報なし",
@@ -28,6 +29,7 @@ const i18n = {
     sort: "Sort by",
     keyword: "Filter by keyword",
     reset: "Reset",
+    language: "Language",
     play: "Play Song",
     link: "Original Stream",
     unknown: "No Info",
@@ -37,6 +39,15 @@ const i18n = {
     fav_toggle_on: "★ Showing Favorites",
     loading: "Loading...",
   }
+};
+
+const categoryTranslations = {
+  "3Dライブ":      { ja: "3Dライブ", en: "3D Live" },
+  "3D配信":        { ja: "3D配信", en: "3D Stream" },
+  "オリジナルMV":  { ja: "オリジナルMV", en: "Original MV" },
+  "カバー曲":      { ja: "カバー曲", en: "Cover Song" },
+  "歌枠":          { ja: "歌枠", en: "Singing Stream" },
+  "歌枠(コラボ)":  { ja: "歌枠(コラボ)", en: "Collab Singing" }
 };
 
 let currentLang = 'ja';
@@ -80,6 +91,7 @@ function updateUILabels() {
   document.getElementById("reset-btn").textContent = t.reset;
   document.getElementById("mode-select").options[0].textContent = t.mode_session;
   document.getElementById("mode-select").options[1].textContent = t.mode_song;
+  document.getElementById("lang-label").textContent = i18n[currentLang].language;
 
   const favBtn = document.getElementById("fav-only-btn");
   favBtn.textContent = favOnlyMode ? t.fav_toggle_on : t.fav_toggle_off;
@@ -370,11 +382,12 @@ function initCategory() {
   cats.forEach(cat => {
     const opt = document.createElement('option');
     opt.value = cat;
-    opt.textContent = cat;
+    opt.textContent = categoryTranslations[cat]?.[currentLang] || cat;
     sel.appendChild(opt);
   });
   sel.addEventListener('change', applyView);
 }
+
 
 function initSortSelect() {
   const ss = document.getElementById('sort-session');

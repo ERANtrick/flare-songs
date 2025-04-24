@@ -56,23 +56,35 @@ h1 small {
 /* お気に入りマーク */
 .fav-btn {
   position: absolute;
-  top: 0.25rem;
+  top: 0.5rem;
   right: 0.5rem;
-  background: none;
+  background-color: rgba(255, 255, 255, 0.85); /* 白背景・透明度あり */
   border: none;
   font-size: 1.4rem;
   color: #ccc;
+  border-radius: 50%;
+  width: 2.2rem;
+  height: 2.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
   z-index: 2;
   cursor: pointer;
-  text-shadow: 0 0 2px #fff;
-  transition: color 0.2s ease;
+  transition: all 0.2s ease;
 }
+
 .fav-btn:hover {
+  transform: scale(1.15);
+  background-color: rgba(255, 255, 255, 1);
   color: var(--primary-accent);
+  box-shadow: 0 0 8px rgba(255, 128, 0, 0.4);
 }
+
 .fav-btn.active {
   color: var(--primary-accent);
 }
+
 
 /* サムネイル */
 .card-img-wrapper {
