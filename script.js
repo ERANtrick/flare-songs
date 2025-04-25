@@ -153,22 +153,36 @@ function createCardCol(song) {
     </div>`;
   col.innerHTML = html;
 
-  // お気に入りボタン
-  const favBtn = col.querySelector('.fav-btn');
-  if (favBtn) {
-    favBtn.addEventListener('click', () => {
-      const link = favBtn.dataset.link;
-      if (isFavorite(link)) {
-        removeFavorite(link);
-        favBtn.classList.remove('active');
-        favBtn.textContent = '☆';
-      } else {
-        addFavorite(link);
-        favBtn.classList.add('active');
-        favBtn.textContent = '★';
-      }
-    });
-  }
+// お気に入りボタン
+const favBtn = col.querySelector('.fav-btn');
+if (favBtn) {
+  favBtn.addEventListener('click', () => {
+    const link = favBtn.dataset.link;
+    const isFav = isFavorite(link);
+    const eventName = isFav ? 'click_fav_remove' : 'click_fav_add';
+
+    if (isFav) {
+      removeFavorite(link);
+      favBtn.classList.remove('active');
+      favBtn.textContent = '☆';
+    } else {
+      addFavorite(link);
+      favBtn.classList.add('active');
+      favBtn.textContent = '★';
+    }
+
+    // GAイベント送信
+    if (typeof gtag === 'function') {
+      gtag('event', eventName, {
+        event_category: 'Favorite',
+        event_label: song['曲名'] || '（曲名なし）',
+        session_title: song['配信タイトル'] || '',
+        link_url: link
+      });
+    }
+  });
+}
+
 
   // GAイベント送信
   const playBtn = col.querySelector('[data-track="play"]');
@@ -326,7 +340,20 @@ function applyView() {
 }
 
 function initUI() {
-  document.getElementById('mode-select').addEventListener('change', applyView);
+  document.getElementById('mode-select').addEventListener('change', (e) => {
+    const selectedMode = e.target.value;
+  
+    // GAイベント送信
+    if (typeof gtag === 'function') {
+      gtag('event', 'change_mode', {
+        event_category: 'UI',
+        event_label: selectedMode // "session" または "song"
+      });
+    }
+  
+    applyView();
+  });
+  
   document.getElementById('search-input').addEventListener('input', applyView);
   document.getElementById('reset-btn').addEventListener('click', () => {
     document.getElementById('mode-select').value = 'session';
@@ -391,8 +418,22 @@ function initCategory() {
     opt.textContent = categoryTranslations[cat]?.[currentLang] || cat;
     sel.appendChild(opt);
   });
-  sel.addEventListener('change', applyView);
+
+  sel.addEventListener('change', (e) => {
+    const selectedCategory = e.target.value;
+
+    // GAイベント送信
+    if (typeof gtag === 'function') {
+      gtag('event', 'change_category', {
+        event_category: 'UI',
+        event_label: selectedCategory || 'All'
+      });
+    }
+
+    applyView();
+  });
 }
+
 
 
 function initSortSelect() {
@@ -405,7 +446,20 @@ function initSortSelect() {
     ss.appendChild(opt);
   });
   ss.value = sessionSortOpts[0].value;
-  ss.addEventListener('change', applyView);
+
+  ss.addEventListener('change', (e) => {
+    const selectedSort = e.target.value;
+
+    // GAイベント送信
+    if (typeof gtag === 'function') {
+      gtag('event', 'change_sort', {
+        event_category: 'UI',
+        event_label: selectedSort
+      });
+    }
+
+    applyView();
+  });
 }
 
 window.addEventListener("DOMContentLoaded", () => {
