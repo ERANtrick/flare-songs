@@ -19,6 +19,7 @@ const i18n = {
     fav_toggle_off: "★ お気に入りだけ表示",
     fav_toggle_on: "★ お気に入り表示中",
     loading: "読み込み中...",
+    no_result: "該当曲がありません",
   },
   en: {
     mode: "Display Mode",
@@ -38,6 +39,7 @@ const i18n = {
     fav_toggle_off: "★ Favorites Only",
     fav_toggle_on: "★ Showing Favorites",
     loading: "Loading...",
+    no_result: "No matching songs found",
   }
 };
 
@@ -333,6 +335,13 @@ function applyView() {
     if (session) list = list.filter(s => s['配信URL'] === session);
     if (category) list = list.filter(s => s['Category'] === category);
     if (kw) list = list.filter(s => (s['曲名'] || '').toLowerCase().includes(kw));
+
+    if (list.length === 0) {
+      const c = document.getElementById('song-list');
+      c.classList.remove('accordion');
+      c.innerHTML = `<div class="text-center my-5 text-muted">${i18n[currentLang].no_result || '該当曲がありません'}</div>`;
+      return;
+    }
 
     if (mode === 'session' && !kw) renderBySession(list, sort);
     else renderGrouped(list);
