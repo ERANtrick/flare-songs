@@ -472,6 +472,7 @@ function initSortSelect() {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
+  document.documentElement.getAttribute('data-bs-theme') === 'auto' && document.documentElement.setAttribute('data-bs-theme',window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
   Papa.parse(CSV_URL, {
     download: true,
     header: true,
