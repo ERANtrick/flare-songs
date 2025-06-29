@@ -7,10 +7,11 @@
 }
 
 /* 全体 */
+/* already bootstrap defined
 body {
   background-color: var(--bg-base);
   color: var(--text-base);
-}
+}*/
 
 /* タイトル */
 h1 {
@@ -107,7 +108,9 @@ h1 small {
 .card-title {
   font-size: 1.2rem;
   font-weight: bold;
+  /*  already bootstrap defined
   color: #000;
+  */
 }
 .card-body .text-muted {
   font-size: 0.8rem;
