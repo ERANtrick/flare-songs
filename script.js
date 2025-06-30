@@ -82,6 +82,17 @@ function initLanguageToggle() {
   }
 }
 
+function initDarkmodeToggle() {
+  document.documentElement.getAttribute('data-bs-theme') === 'auto' && document.documentElement.setAttribute('data-bs-theme',window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  const darkMode = document.getElementById("dark-mode-btn");
+  if (darkMode) {
+    darkMode.addEventListener("click",(e)=>{
+      e.preventDefault();
+      document.documentElement.setAttribute('data-bs-theme',document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark'));
+    }
+  }
+}
+
 function updateUILabels() {
   const t = i18n[currentLang];
   document.querySelector("label[for='mode-select']").textContent = t.mode;
@@ -472,13 +483,13 @@ function initSortSelect() {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-  document.documentElement.getAttribute('data-bs-theme') === 'auto' && document.documentElement.setAttribute('data-bs-theme',window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
   Papa.parse(CSV_URL, {
     download: true,
     header: true,
     complete: ({ data }) => {
       allSongs = data;
       initLanguageToggle();
+      initDarkModeToggle();
       initSortSelect();
       initSessionSelect();
       initCategory();
