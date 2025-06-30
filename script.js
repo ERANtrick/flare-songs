@@ -81,9 +81,9 @@ function initLanguageToggle() {
     });
   }
 }
-
+//pre process
+document.documentElement.getAttribute('data-bs-theme') === 'auto' && document.documentElement.setAttribute('data-bs-theme',window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 function initDarkmodeToggle() {
-  document.documentElement.getAttribute('data-bs-theme') === 'auto' && document.documentElement.setAttribute('data-bs-theme',window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   const darkMode = document.getElementById("dark-mode-btn");
   if (darkMode) {
     darkMode.addEventListener("click",(e)=>{
