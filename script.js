@@ -89,7 +89,7 @@ function initDarkmodeToggle() {
     darkMode.addEventListener("click",(e)=>{
       e.preventDefault();
       document.documentElement.setAttribute('data-bs-theme',document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark');
-    }
+    });
   }
 }
 
