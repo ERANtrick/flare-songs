@@ -489,7 +489,7 @@ window.addEventListener("DOMContentLoaded", () => {
     complete: ({ data }) => {
       allSongs = data;
       initLanguageToggle();
-      initDarkModeToggle();
+      initDarkmodeToggle();
       initSortSelect();
       initSessionSelect();
       initCategory();
