@@ -24,7 +24,7 @@ const i18n = {
   },
   en: {
     mode: "Display Mode",
-    darkmode: "Dark mode",
+    darkmode: "Dark Mode",
     mode_session: "Stream Sessions",
     mode_song: "Song List",
     session: "Select Stream",
