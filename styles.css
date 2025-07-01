@@ -7,9 +7,23 @@
 }
 
 /* 全体 */
-body {
-  background-color: var(--bg-base);
-  color: var(--text-base);
+@include color-mode(light){
+  body {
+    background-color: var(--bg-base);
+    color: var(--text-base);
+  }
+  .card-title{
+    color: #000;
+  }
+}
+@include color-mode(dark){
+  /*body {
+    background-color: var(--bg-base);
+    color: var(--text-base);
+  }
+  .card-title{
+    color: #000;
+  }*/
 }
 
 /* タイトル */
@@ -107,7 +121,6 @@ h1 small {
 .card-title {
   font-size: 1.2rem;
   font-weight: bold;
-  color: #000;
 }
 .card-body .text-muted {
   font-size: 0.8rem;

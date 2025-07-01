@@ -3,6 +3,7 @@ const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS1O8_fE8vDDkvo
 const i18n = {
   ja: {
     mode: "表示モード",
+    darkmode: "ダークモード",
     mode_session: "配信枠一覧 | Stream Sessions",
     mode_song: "曲名一覧 | Song List",
     session: "配信を選択",
@@ -23,6 +24,7 @@ const i18n = {
   },
   en: {
     mode: "Display Mode",
+    darkmode: "Dark mode",
     mode_session: "Stream Sessions",
     mode_song: "Song List",
     session: "Select Stream",
@@ -81,6 +83,17 @@ function initLanguageToggle() {
     });
   }
 }
+//pre process
+document.documentElement.getAttribute('data-bs-theme') === 'auto' && document.documentElement.setAttribute('data-bs-theme',window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+function initDarkmodeToggle() {
+  const darkmode = document.getElementById("dark-mode-btn");
+  if (darkmode) {
+    darkmode.addEventListener("click",(e)=>{
+      e.preventDefault();
+      document.documentElement.setAttribute('data-bs-theme',document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark');
+    });
+  }
+}
 
 function updateUILabels() {
   const t = i18n[currentLang];
@@ -95,6 +108,7 @@ function updateUILabels() {
   document.getElementById("mode-select").options[1].textContent = t.mode_song;
   document.getElementById("lang-label").textContent = t.language;
 
+  document.getElementById("dark-mode-btn").innerText = t.darkmode;
   // お気に入りボタンの表示内容とクラスの統一（ここを追加）
   const favBtn = document.getElementById("fav-only-btn");
   favBtn.textContent = favOnlyMode ? t.fav_toggle_on : t.fav_toggle_off;
@@ -478,6 +492,7 @@ window.addEventListener("DOMContentLoaded", () => {
     complete: ({ data }) => {
       allSongs = data;
       initLanguageToggle();
+      initDarkmodeToggle();
       initSortSelect();
       initSessionSelect();
       initCategory();
