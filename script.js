@@ -21,6 +21,21 @@ const i18n = {
     fav_toggle_on: "★ お気に入り表示中",
     loading: "読み込み中...",
     no_result: "該当曲がありません",
+    surprise_heading: 'おまかせで1曲',
+    surprise_all: 'すべて',
+    surprise_mv: 'MV・カバー曲',
+    surprise_singing: '歌枠',
+    surprise_live: '3Dライブ・配信',
+    surprise_pick: '1曲選ぶ',
+    surprise_close: '閉じる',
+    surprise_listen: 'YouTubeで聴く',
+    surprise_again: '別の曲を選ぶ',
+    surprise_add: 'お気に入りに登録',
+    surprise_remove: 'お気に入りを解除',
+    surprise_history: 'この曲の歌唱履歴を見る（全{count}件）',
+    surprise_loading: '曲データを読み込み中です…',
+    surprise_empty: 'このカテゴリには再生できる曲がありません。別のカテゴリを選んでください。',
+    surprise_error: '曲データを読み込めませんでした。ページを再読み込みしてください。',
   },
   en: {
     mode: "Display Mode",
@@ -42,6 +57,21 @@ const i18n = {
     fav_toggle_on: "★ Showing Favorites",
     loading: "Loading...",
     no_result: "No matching songs found",
+    surprise_heading: 'Let Flare surprise you',
+    surprise_all: 'All categories',
+    surprise_mv: 'MVs & covers',
+    surprise_singing: 'Singing streams',
+    surprise_live: '3D live shows & streams',
+    surprise_pick: 'Pick a song',
+    surprise_close: 'Close',
+    surprise_listen: 'Listen on YouTube',
+    surprise_again: 'Pick another song',
+    surprise_add: 'Add to favorites',
+    surprise_remove: 'Remove from favorites',
+    surprise_history: 'See all performances ({count})',
+    surprise_loading: 'Loading songs…',
+    surprise_empty: 'No playable songs in this category. Please choose another category.',
+    surprise_error: 'Songs could not be loaded. Please reload this page.',
   }
 };
 
@@ -58,6 +88,23 @@ let currentLang = 'ja';
 let allSongs = [];
 let allCategories = [];
 let favOnlyMode = false;
+let exactSongTitle = null; // 通常の部分一致検索とは別の、履歴表示専用の条件。
+let viewRevision = 0;
+let currentSurprise = null;
+let surpriseStatusKey = 'surprise_loading';
+let songsLoaded = false;
+let favoriteMemory = [];
+let drawHistoryMemory = [];
+let favoriteStorageAvailable = true;
+let drawStorageAvailable = true;
+const DRAW_HISTORY_KEY = 'flare-songs:surprise-history:v1';
+const DRAW_HISTORY_LIMIT = 10;
+const surpriseCategories = {
+  all: null, // 将来追加されたカテゴリも対象。
+  mv: ['オリジナルMV', 'カバー曲'],
+  singing: ['歌枠', '歌枠(コラボ)'],
+  live: ['3Dライブ', '3D配信']
+};
 
 const sessionSortOpts = [
   { value: 'date-desc', text: { ja: '配信日順（新しい順）', en: 'Newest First' }},
@@ -75,10 +122,12 @@ function initLanguageToggle() {
   if (langSelect) {
     langSelect.addEventListener("change", (e) => {
       currentLang = e.target.value;
+      document.documentElement.lang = currentLang;
       updateUILabels();
       initSortSelect();
       initSessionSelect();
       initCategory();
+      renderSurpriseResult();
       applyView();
     });
   }
@@ -116,22 +165,33 @@ function updateUILabels() {
   favBtn.classList.toggle("active", favOnlyMode);
   favBtn.classList.toggle("btn-warning", favOnlyMode);
   favBtn.classList.toggle("btn-outline-warning", !favOnlyMode);
+  updateSurpriseLabels();
+  syncFavoriteButtons();
 }
 
 
 function getFavorites() {
-  return JSON.parse(localStorage.getItem('favorites') || '[]');
+  if (!favoriteStorageAvailable) return [...favoriteMemory];
+  try {
+    const saved = JSON.parse(localStorage.getItem('favorites') || '[]');
+    if (Array.isArray(saved)) favoriteMemory = saved.filter(value => typeof value === 'string');
+  } catch (_) { favoriteStorageAvailable = false; }
+  return [...favoriteMemory];
+}
+function saveFavorites(favs) {
+  favoriteMemory = [...favs];
+  try { localStorage.setItem('favorites', JSON.stringify(favs)); } catch (_) { favoriteStorageAvailable = false; }
 }
 function addFavorite(link) {
   const favs = getFavorites();
   if (!favs.includes(link)) {
     favs.push(link);
-    localStorage.setItem('favorites', JSON.stringify(favs));
+    saveFavorites(favs);
   }
 }
 function removeFavorite(link) {
   const favs = getFavorites().filter(f => f !== link);
-  localStorage.setItem('favorites', JSON.stringify(favs));
+  saveFavorites(favs);
 }
 function isFavorite(link) {
   return getFavorites().includes(link);
@@ -139,99 +199,48 @@ function isFavorite(link) {
 
 function createCardCol(song) {
   const title = song['曲名'] || '（曲名なし）';
-  const date  = song['配信日'] || '';
-  const sess  = song['配信タイトル'] || '';
-  const note  = song['備考'] || '';
-  const link  = song['リンク'] || '';
-  const url   = song['配信URL'] || '';
-  const img   = song['ThumbnailURL'] || '';
-  const key   = link || url;
-  const fav   = isFavorite(key);
-
-  const col = document.createElement('div');
-  col.className = 'col-12 col-sm-6 col-md-4';
-
-  const html = `
-    <div class="card h-100 position-relative">
-      ${img ? `<div class="card-img-wrapper">
-        <button class="fav-btn ${fav ? 'active' : ''}" data-link="${key}">${fav ? '★' : '☆'}</button>
-        <img src="${img}" alt="${title}" loading="lazy"></div>` : ''}
-      <div class="card-body d-flex flex-column">
-        <h5 class="card-title">${title}</h5>
-        <p class="text-muted mb-2" style="font-size:0.9rem">${date}${sess ? ' ｜ ' + sess : ''}</p>
-        ${note ? `<p class="text-muted mb-2">${note}</p>` : ''}
-        <div class="mt-auto d-flex gap-2">
-          ${link ? `<a href="${link}" class="btn btn-primary flex-fill" target="_blank" data-track="play">${i18n[currentLang].play}</a>` : ''}
-          ${url  ? `<a href="${url}" class="btn btn-secondary flex-fill" target="_blank" data-track="orig">${i18n[currentLang].link}</a>` : ''}
-          ${!link && !url ? `<span class="text-secondary">${i18n[currentLang].unknown}</span>` : ''}
-        </div>
-      </div>
-    </div>`;
-  col.innerHTML = html;
-
-// お気に入りボタン
-const favBtn = col.querySelector('.fav-btn');
-if (favBtn) {
-  favBtn.addEventListener('click', () => {
-    const link = favBtn.dataset.link;
-    const isFav = isFavorite(link);
-    const eventName = isFav ? 'click_fav_remove' : 'click_fav_add';
-
-    if (isFav) {
-      removeFavorite(link);
-      favBtn.classList.remove('active');
-      favBtn.textContent = '☆';
-    } else {
-      addFavorite(link);
-      favBtn.classList.add('active');
-      favBtn.textContent = '★';
-    }
-
-    // GAイベント送信
-    if (typeof gtag === 'function') {
-      gtag('event', eventName, {
-        event_category: 'Favorite',
-        event_label: song['曲名'] || '（曲名なし）',
-        session_title: song['配信タイトル'] || '',
-        link_url: link
-      });
-    }
-  });
-}
-
-
-  // GAイベント送信
-  const playBtn = col.querySelector('[data-track="play"]');
-  if (playBtn) {
-    playBtn.addEventListener('click', () => {
-      if (typeof gtag === 'function') {
-        gtag('event', 'click_play', {
-          event_category: 'Song',
-          event_label: title,
-          session_title: sess,
-          link_url: link
-        });
-      }
-    });
+  const col = makeElement('div', 'col-12 col-sm-6 col-md-4');
+  const card = makeElement('div', 'card h-100 position-relative');
+  const imgURL = safeWebURL(song['ThumbnailURL']);
+  if (imgURL) {
+    const wrapper = makeElement('div', 'card-img-wrapper');
+    const image = makeElement('img');
+    image.src = imgURL;
+    image.alt = title;
+    image.loading = 'lazy';
+    wrapper.append(createFavoriteButton(song), image);
+    card.append(wrapper);
   }
-
-  const origBtn = col.querySelector('[data-track="orig"]');
-  if (origBtn) {
-    origBtn.addEventListener('click', () => {
-      if (typeof gtag === 'function') {
-        gtag('event', 'click_orig', {
-          event_category: 'Stream',
-          event_label: title,
-          session_title: sess,
-          link_url: url
-        });
-      }
-    });
+  const body = makeElement('div', 'card-body d-flex flex-column');
+  body.append(makeElement('h5', 'card-title', title));
+  const meta = [song['配信日'], song['配信タイトル']].filter(Boolean).join(' ｜ ');
+  if (meta) {
+    const metaNode = makeElement('p', 'text-muted mb-2', meta);
+    metaNode.style.fontSize = '0.9rem';
+    body.append(metaNode);
   }
-
+  if (song['備考']) body.append(makeElement('p', 'text-muted mb-2', song['備考']));
+  const actions = makeElement('div', 'mt-auto d-flex gap-2');
+  for (const [field, label, css, eventName] of [
+    ['リンク', 'play', 'btn-primary', 'click_play'],
+    ['配信URL', 'link', 'btn-secondary', 'click_orig']
+  ]) {
+    const url = safeWebURL(song[field]);
+    if (!url) continue;
+    const anchor = makeElement('a', 'btn ' + css + ' flex-fill', i18n[currentLang][label]);
+    anchor.href = url;
+    anchor.target = '_blank';
+    anchor.rel = 'noopener noreferrer';
+    anchor.dataset.track = label === 'play' ? 'play' : 'orig';
+    anchor.addEventListener('click', () => trackSongEvent(eventName, song, song[field], label === 'play' ? 'Song' : 'Stream'));
+    actions.append(anchor);
+  }
+  if (!actions.childElementCount) actions.append(makeElement('span', 'text-secondary', i18n[currentLang].unknown));
+  body.append(actions);
+  card.append(body);
+  col.append(card);
   return col;
 }
-
 
 function renderBySession(songs, sortKey) {
   const c = document.getElementById('song-list');
@@ -280,89 +289,103 @@ function renderBySession(songs, sortKey) {
 function renderGrouped(songs) {
   const c = document.getElementById('song-list');
   c.classList.add('accordion');
-  c.innerHTML = '';
-
+  c.replaceChildren();
   const sortKey = document.getElementById('sort-session').value;
-  const groupMap = new Map();
-
-  for (const s of songs) {
-    const t = s['曲名'] || '（曲名なし）';
-    if (!groupMap.has(t)) groupMap.set(t, []);
-    groupMap.get(t).push(s);
-  }
-
-  const groups = [...groupMap.entries()].map(([title, list]) => {
+  const groups = [...groupSongsByTitle(songs)].map(([title, list]) => {
     list.sort((a, b) => new Date(a['日付']) - new Date(b['日付']));
     if (sortKey === 'date-desc') list.reverse();
     if (sortKey === 'random') list.sort(() => Math.random() - 0.5);
     return { title, list, repDate: new Date(list[0]['日付']) };
   });
-
   if (sortKey !== 'random') {
-    groups.sort((a, b) =>
-      sortKey === 'date-asc' ? a.repDate - b.repDate : b.repDate - a.repDate
-    );
+    groups.sort((a, b) => sortKey === 'date-asc' ? a.repDate - b.repDate : b.repDate - a.repDate);
   }
-
   const fragment = document.createDocumentFragment();
   groups.forEach(({ title, list }, i) => {
-    const id = `grp${i}`;
-    const item = document.createElement('div');
-    item.className = 'accordion-item';
-    item.innerHTML = `
-      <h2 class="accordion-header" id="heading-${id}">
-        <button class="accordion-button collapsed" type="button"
-          data-bs-toggle="collapse" data-bs-target="#collapse-${id}"
-          aria-expanded="false" aria-controls="collapse-${id}">
-          ${title} （${list.length}件）
-        </button>
-      </h2>
-      <div id="collapse-${id}" class="accordion-collapse collapse"
-        data-bs-parent="#song-list">
-        <div class="accordion-body p-0"><div class="row g-3 m-3"></div></div>
-      </div>`;
-    const row = item.querySelector('.row');
-    list.forEach(song => row.appendChild(createCardCol(song)));
-    fragment.appendChild(item);
+    const id = 'grp' + i;
+    const item = makeElement('div', 'accordion-item');
+    item.dataset.songTitle = title;
+    const header = makeElement('h2', 'accordion-header');
+    header.id = 'heading-' + id;
+    const button = makeElement('button', 'accordion-button collapsed', title + ' （' + list.length + '件）');
+    button.type = 'button';
+    button.dataset.bsToggle = 'collapse';
+    button.dataset.bsTarget = '#collapse-' + id;
+    button.setAttribute('aria-expanded', 'false');
+    button.setAttribute('aria-controls', 'collapse-' + id);
+    header.append(button);
+    const collapse = makeElement('div', 'accordion-collapse collapse');
+    collapse.id = 'collapse-' + id;
+    collapse.dataset.bsParent = '#song-list';
+    const body = makeElement('div', 'accordion-body p-0');
+    const row = makeElement('div', 'row g-3 m-3');
+    list.forEach(song => row.append(createCardCol(song)));
+    body.append(row);
+    collapse.append(body);
+    item.append(header, collapse);
+    fragment.append(item);
   });
-
-  c.appendChild(fragment);
+  c.append(fragment);
 }
 
-function applyView() {
+function applyView({ revealHistory = false } = {}) {
+  const revision = ++viewRevision;
   showSpinner();
-
-  setTimeout(() => {
-    const mode = document.getElementById('mode-select').value;
-    const session = document.getElementById('session-select').value;
-    const category = document.getElementById('category-select').value;
-    const sort = document.getElementById('sort-session').value;
-    const kw = document.getElementById('search-input').value.trim().toLowerCase();
-
-    let list = allSongs.filter(s => s['公開'] === '公開');
-
-    if (favOnlyMode) {
-      const favs = getFavorites();
-      list = list.filter(s => favs.includes(s['リンク'] || s['配信URL']));
-    }
-
-    if (session) list = list.filter(s => s['配信URL'] === session);
-    if (category) list = list.filter(s => s['Category'] === category);
-    if (kw) list = list.filter(s => (s['曲名'] || '').toLowerCase().includes(kw));
-
-    if (list.length === 0) {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      if (revision !== viewRevision) return resolve(false);
+      const mode = document.getElementById('mode-select').value;
+      const session = document.getElementById('session-select').value;
+      const category = document.getElementById('category-select').value;
+      const sort = document.getElementById('sort-session').value;
+      const kw = document.getElementById('search-input').value.trim().toLowerCase();
+      let list = allSongs.filter(s => s['公開'] === '公開');
+      if (exactSongTitle !== null) {
+        list = list.filter(s => s['曲名'] === exactSongTitle);
+      } else {
+        if (favOnlyMode) {
+          const favs = getFavorites();
+          list = list.filter(s => favs.includes(s['リンク'] || s['配信URL']));
+        }
+        if (session) list = list.filter(s => s['配信URL'] === session);
+        if (category) list = list.filter(s => s['Category'] === category);
+        if (kw) list = list.filter(s => (s['曲名'] || '').toLowerCase().includes(kw));
+      }
       const c = document.getElementById('song-list');
-      c.classList.remove('accordion');
-      c.innerHTML = `<div class="text-center my-5 text-muted">${i18n[currentLang].no_result || '該当曲がありません'}</div>`;
-      return;
-    }
-
-    if (mode === 'session' && !kw) renderBySession(list, sort);
-    else renderGrouped(list);
-  }, 100);
+      if (!list.length) {
+        c.classList.remove('accordion');
+        c.replaceChildren(makeElement('div', 'text-center my-5 text-muted', i18n[currentLang].no_result));
+        return resolve(true);
+      }
+      if (mode === 'session' && !kw && exactSongTitle === null) renderBySession(list, sort);
+      else renderGrouped(list);
+      if (exactSongTitle !== null) {
+        const item = [...c.querySelectorAll('.accordion-item')].find(node => node.dataset.songTitle === exactSongTitle);
+        if (item) {
+          // 描画済みDOMを開く。Bootstrapの次回の開閉操作とも状態を合わせる。
+          item.querySelector('.accordion-collapse').classList.add('show');
+          const button = item.querySelector('.accordion-button');
+          button.classList.remove('collapsed');
+          button.setAttribute('aria-expanded', 'true');
+          if (revealHistory) {
+            requestAnimationFrame(() => {
+              if (revision !== viewRevision || !item.isConnected) return resolve(false);
+              item.scrollIntoView({ behavior: 'auto', block: 'start' });
+              button.focus({ preventScroll: true });
+              resolve(true);
+            });
+            return;
+          }
+        }
+      }
+      resolve(true);
+    }, 100);
+  });
 }
 
 function initUI() {
+  const normalView = () => { exactSongTitle = null; return applyView(); };
+  document.getElementById('session-select').addEventListener('change', normalView);
   document.getElementById('mode-select').addEventListener('change', (e) => {
     const selectedMode = e.target.value;
   
@@ -374,10 +397,10 @@ function initUI() {
       });
     }
   
-    applyView();
+    normalView();
   });
   
-  document.getElementById('search-input').addEventListener('input', applyView);
+  document.getElementById('search-input').addEventListener('input', normalView);
   document.getElementById('reset-btn').addEventListener('click', () => {
     document.getElementById('mode-select').value = 'session';
     document.getElementById('session-select').value = '';
@@ -386,7 +409,7 @@ function initUI() {
     document.getElementById('search-input').value = '';
     favOnlyMode = false;
     updateUILabels();
-    applyView();
+    normalView();
   });
 
   document.getElementById("fav-only-btn").addEventListener("click", () => {
@@ -396,12 +419,13 @@ function initUI() {
     btn.classList.toggle("btn-warning");
     btn.classList.toggle("btn-outline-warning");
     updateUILabels();
-    applyView();
+    normalView();
   });
 }
 
 function initSessionSelect() {
   const sel = document.getElementById('session-select');
+  const previousValue = sel.value;
   const map = allSongs.reduce((acc, s) => {
     if (s['公開'] !== '公開') return acc;
     const key = s['配信URL'];
@@ -422,11 +446,12 @@ function initSessionSelect() {
     opt.textContent = o.label;
     sel.appendChild(opt);
   });
-  sel.addEventListener('change', applyView);
+  sel.value = previousValue;
 }
 
 function initCategory() {
   const sel = document.getElementById('category-select');
+  const previousValue = sel.value;
   const cats = [...new Set(
     allSongs.filter(s => s['公開'] === '公開')
             .map(s => s['Category'])
@@ -442,7 +467,8 @@ function initCategory() {
     sel.appendChild(opt);
   });
 
-  sel.addEventListener('change', (e) => {
+  sel.value = previousValue;
+  sel.onchange = (e) => {
     const selectedCategory = e.target.value;
 
     // GAイベント送信
@@ -453,14 +479,258 @@ function initCategory() {
       });
     }
 
+    exactSongTitle = null;
     applyView();
-  });
+  };
 }
 
 
 
+// 曲名の表記は加工せず、既存の曲名一覧と抽選でグループを共有する。
+function groupSongsByTitle(songs) {
+  const groups = new Map();
+  for (const song of songs) {
+    const title = song['曲名'] || '（曲名なし）';
+    if (!groups.has(title)) groups.set(title, []);
+    groups.get(title).push(song);
+  }
+  return groups;
+}
+
+function safeWebURL(value) {
+  if (typeof value !== 'string' || !value.trim()) return '';
+  try {
+    const url = new URL(value.trim());
+    return ['https:', 'http:'].includes(url.protocol) && !url.username && !url.password ? url.href : '';
+  } catch (_) { return ''; }
+}
+
+function isPlayableYouTubeLink(value) {
+  const safe = safeWebURL(value);
+  if (!safe) return false;
+  const url = new URL(safe);
+  const videoID = /^[A-Za-z0-9_-]{11}$/;
+  if (['youtu.be', 'www.youtu.be'].includes(url.hostname)) {
+    return videoID.test(url.pathname.replace(/^\//, '').replace(/\/$/, ''));
+  }
+  if (!['youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com'].includes(url.hostname)) return false;
+  if (url.pathname === '/watch') return videoID.test(url.searchParams.get('v') || '');
+  return /^\/(?:shorts|live|embed)\/[A-Za-z0-9_-]{11}\/?$/.test(url.pathname);
+}
+
+function getSurpriseGroups(songs, category) {
+  const allowed = surpriseCategories[category];
+  if (allowed === undefined) return new Map();
+  return groupSongsByTitle(songs.filter(song =>
+    song['公開'] === '公開' && typeof song['曲名'] === 'string' && song['曲名'].trim() &&
+    isPlayableYouTubeLink(song['リンク']) && (!allowed || allowed.includes(song['Category']))
+  ));
+}
+
+// 候補が空なら、最古の履歴から一つずつ制限を緩める（最大10回）。
+function chooseSurpriseSong(groups, history = [], random = Math.random) {
+  if (!groups.size) return null;
+  const recent = history.slice(-DRAW_HISTORY_LIMIT);
+  const lastTitle = recent[recent.length - 1];
+  const titles = [...groups.keys()];
+  let candidates = titles.filter(title => !recent.includes(title));
+  while (!candidates.length && recent.length) {
+    recent.shift();
+    candidates = titles.filter(title => !recent.includes(title));
+  }
+  if (titles.length > 1) {
+    const others = candidates.filter(title => title !== lastTitle);
+    if (others.length) candidates = others;
+  }
+  const title = candidates[Math.floor(random() * candidates.length)];
+  const performances = groups.get(title);
+  return performances[Math.floor(random() * performances.length)];
+}
+
+function getDrawHistory() {
+  if (!drawStorageAvailable) return [...drawHistoryMemory];
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(DRAW_HISTORY_KEY) || '[]');
+    if (Array.isArray(saved)) drawHistoryMemory = saved.filter(title => typeof title === 'string').slice(-DRAW_HISTORY_LIMIT);
+  } catch (_) { drawStorageAvailable = false; }
+  return [...drawHistoryMemory];
+}
+
+function rememberDraw(title) {
+  drawHistoryMemory = [...getDrawHistory(), title].slice(-DRAW_HISTORY_LIMIT);
+  try { sessionStorage.setItem(DRAW_HISTORY_KEY, JSON.stringify(drawHistoryMemory)); } catch (_) { drawStorageAvailable = false; }
+}
+
+function makeElement(tag, className = '', text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+
+function trackSongEvent(name, song, link, category) {
+  if (typeof gtag === 'function') {
+    gtag('event', name, {
+      event_category: category,
+      event_label: song['曲名'] || '（曲名なし）',
+      session_title: song['配信タイトル'] || '',
+      link_url: link
+    });
+  }
+}
+
+function toggleSongFavorite(song) {
+  const key = song['リンク'] || song['配信URL'];
+  if (!key) return;
+  const previous = isFavorite(key);
+  if (previous) removeFavorite(key);
+  else addFavorite(key);
+  trackSongEvent(previous ? 'click_fav_remove' : 'click_fav_add', song, key, 'Favorite');
+  syncFavoriteButtons();
+  if (favOnlyMode) applyView();
+}
+
+function createFavoriteButton(song) {
+  const button = makeElement('button', 'fav-btn');
+  button.type = 'button';
+  button.dataset.favoriteKey = song['リンク'] || song['配信URL'] || '';
+  button.dataset.songTitle = song['曲名'] || '（曲名なし）';
+  updateFavoriteButton(button, isFavorite(button.dataset.favoriteKey));
+  button.addEventListener('click', () => toggleSongFavorite(song));
+  return button;
+}
+
+function updateFavoriteButton(button, active) {
+  button.textContent = active ? '★' : '☆';
+  button.classList.toggle('active', active);
+  button.setAttribute('aria-pressed', String(active));
+  button.setAttribute('aria-label', i18n[currentLang][active ? 'surprise_remove' : 'surprise_add'] + ': ' + button.dataset.songTitle);
+}
+
+function syncFavoriteButtons() {
+  const favorites = new Set(getFavorites());
+  document.querySelectorAll('[data-favorite-key]').forEach(button => updateFavoriteButton(button, favorites.has(button.dataset.favoriteKey)));
+  if (currentSurprise) {
+    const button = document.getElementById('surprise-favorite');
+    const active = favorites.has(currentSurprise['リンク'] || currentSurprise['配信URL']);
+    button.classList.toggle('active', active);
+    button.setAttribute('aria-pressed', String(active));
+    button.querySelector('.surprise-star').textContent = active ? '★' : '☆';
+    setSurpriseButtonLabel('favorite', active ? 'surprise_remove' : 'surprise_add');
+  }
+}
+
+function setSurpriseButtonLabel(name, key, count) {
+  const node = document.querySelector('[data-surprise-label="' + name + '"]');
+  node.textContent = i18n[currentLang][key].replace('{count}', count ?? '');
+  node.lang = currentLang;
+}
+
+function updateSurpriseLabels() {
+  const t = i18n[currentLang];
+  document.getElementById('surprise-heading').textContent = t.surprise_heading;
+  document.getElementById('surprise-category-label').textContent = t.category;
+  const select = document.getElementById('surprise-category');
+  for (const option of select.options) option.textContent = t['surprise_' + option.value];
+  const pick = document.getElementById('surprise-pick');
+  setSurpriseButtonLabel('pick', currentSurprise ? 'surprise_close' : 'surprise_pick');
+  pick.classList.toggle('btn-primary', !currentSurprise);
+  pick.classList.toggle('btn-outline-secondary', !!currentSurprise);
+  pick.querySelector('.surprise-icon').hidden = !!currentSurprise;
+  for (const [name, key] of [['listen', 'surprise_listen'], ['again', 'surprise_again']]) {
+    setSurpriseButtonLabel(name, key);
+  }
+  const count = currentSurprise ? getPublicHistory(currentSurprise['曲名']).length : 0;
+  setSurpriseButtonLabel('history', 'surprise_history', count);
+  const status = document.getElementById('surprise-status');
+  status.textContent = surpriseStatusKey ? t[surpriseStatusKey] : '';
+  status.hidden = !surpriseStatusKey;
+}
+
+function getPublicHistory(title) {
+  return allSongs.filter(song => song['公開'] === '公開' && song['曲名'] === title);
+}
+
+function renderSurpriseResult() {
+  const result = document.getElementById('surprise-result');
+  result.hidden = !currentSurprise;
+  document.getElementById('surprise-pick').setAttribute('aria-expanded', String(!!currentSurprise));
+  updateSurpriseLabels();
+  if (!currentSurprise) return;
+  const song = currentSurprise;
+  document.getElementById('surprise-song-title').textContent = song['曲名'];
+  const details = {
+    'surprise-date': song['配信日'] || song['日付'],
+    'surprise-song-category': categoryTranslations[song['Category']]?.[currentLang] || song['Category'],
+    'surprise-session': song['配信タイトル']
+  };
+  for (const [id, value] of Object.entries(details)) {
+    const node = document.getElementById(id);
+    node.textContent = value || '';
+    node.hidden = !value;
+  }
+  const image = document.getElementById('surprise-thumbnail');
+  const imageURL = safeWebURL(song['ThumbnailURL']);
+  image.parentElement.hidden = !imageURL;
+  if (imageURL) {
+    image.src = imageURL;
+    image.alt = song['曲名'];
+  } else image.removeAttribute('src');
+  document.getElementById('surprise-play').href = safeWebURL(song['リンク']);
+  document.getElementById('surprise-history').hidden = getPublicHistory(song['曲名']).length < 2;
+  syncFavoriteButtons();
+}
+
+function drawSurprise() {
+  if (!songsLoaded) return;
+  const category = document.getElementById('surprise-category').value;
+  currentSurprise = chooseSurpriseSong(getSurpriseGroups(allSongs, category), getDrawHistory());
+  surpriseStatusKey = currentSurprise ? '' : 'surprise_empty';
+  if (currentSurprise) rememberDraw(currentSurprise['曲名']);
+  renderSurpriseResult();
+}
+
+function showSurpriseHistory() {
+  if (!currentSurprise) return Promise.resolve(false);
+  exactSongTitle = currentSurprise['曲名'];
+  document.getElementById('mode-select').value = 'song';
+  document.getElementById('session-select').value = '';
+  document.getElementById('category-select').value = '';
+  document.getElementById('sort-session').value = 'date-desc';
+  document.getElementById('search-input').value = exactSongTitle;
+  favOnlyMode = false;
+  updateUILabels();
+  return applyView({ revealHistory: true });
+}
+
+function closeSurpriseResult() {
+  currentSurprise = null;
+  surpriseStatusKey = songsLoaded ? '' : surpriseStatusKey;
+  renderSurpriseResult();
+}
+
+function initSurprise() {
+  document.getElementById('surprise-pick').addEventListener('click', () => {
+    if (currentSurprise) closeSurpriseResult();
+    else drawSurprise();
+  });
+  document.getElementById('surprise-again').addEventListener('click', drawSurprise);
+  document.getElementById('surprise-category').addEventListener('change', closeSurpriseResult);
+  document.getElementById('surprise-favorite').addEventListener('click', () => {
+    if (currentSurprise) toggleSongFavorite(currentSurprise);
+  });
+  document.getElementById('surprise-history').addEventListener('click', showSurpriseHistory);
+  document.getElementById('surprise-play').addEventListener('click', () => {
+    if (currentSurprise) trackSongEvent('click_play', currentSurprise, currentSurprise['リンク'], 'Song');
+  });
+  document.getElementById('surprise-thumbnail').addEventListener('error', event => {
+    event.target.parentElement.hidden = true;
+  });
+}
+
 function initSortSelect() {
   const ss = document.getElementById('sort-session');
+  const previousValue = ss.value;
   ss.innerHTML = '';
   sessionSortOpts.forEach(o => {
     const opt = document.createElement('option');
@@ -468,9 +738,9 @@ function initSortSelect() {
     opt.textContent = o.text[currentLang];
     ss.appendChild(opt);
   });
-  ss.value = sessionSortOpts[0].value;
+  ss.value = previousValue || sessionSortOpts[0].value;
 
-  ss.addEventListener('change', (e) => {
+  ss.onchange = (e) => {
     const selectedSort = e.target.value;
 
     // GAイベント送信
@@ -481,24 +751,42 @@ function initSortSelect() {
       });
     }
 
+    exactSongTitle = null;
     applyView();
-  });
+  };
 }
 
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener('DOMContentLoaded', () => {
+  // UIイベントはCSV完了時や言語変更時には再登録しない。
+  initLanguageToggle();
+  initDarkmodeToggle();
+  initSortSelect();
+  initSessionSelect();
+  initCategory();
+  initUI();
+  initSurprise();
+  updateUILabels();
+  const failLoading = () => {
+    songsLoaded = false;
+    surpriseStatusKey = 'surprise_error';
+    updateSurpriseLabels();
+    document.getElementById('song-list').replaceChildren(makeElement('p', 'text-center text-body-secondary my-4', i18n[currentLang].surprise_error));
+  };
+  if (typeof Papa === 'undefined') return failLoading();
   Papa.parse(CSV_URL, {
     download: true,
     header: true,
     complete: ({ data }) => {
+      if (!data.some(song => Object.hasOwn(song, '曲名') && Object.hasOwn(song, '公開'))) return failLoading();
       allSongs = data;
-      initLanguageToggle();
-      initDarkmodeToggle();
-      initSortSelect();
+      songsLoaded = true;
+      surpriseStatusKey = '';
+      document.getElementById('surprise-pick').disabled = false;
       initSessionSelect();
       initCategory();
-      initUI();
       updateUILabels();
       applyView();
-    }
+    },
+    error: failLoading
   });
 });

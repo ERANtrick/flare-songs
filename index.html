@@ -48,6 +48,59 @@
       </select>
     </div>
     
+    <!-- おまかせで1曲（検索条件とは独立した抽選） -->
+    <section id="surprise-area" class="surprise-area mb-4" aria-labelledby="surprise-heading">
+      <div class="surprise-controls">
+        <h2 id="surprise-heading">おまかせで1曲</h2>
+        <div class="surprise-category-field">
+          <label for="surprise-category" id="surprise-category-label" class="form-label small">カテゴリ</label>
+          <select id="surprise-category" class="form-select form-select-sm">
+            <option value="all">すべて</option>
+            <option value="mv">MV・カバー曲</option>
+            <option value="singing">歌枠</option>
+            <option value="live">3Dライブ・配信</option>
+          </select>
+        </div>
+        <button id="surprise-pick" type="button" class="btn btn-primary surprise-action" disabled
+          aria-controls="surprise-result" aria-expanded="false">
+          <img class="surprise-icon" src="assets/icons/shuffle.svg" alt="" aria-hidden="true">
+          <span data-surprise-label="pick">1曲選ぶ</span>
+        </button>
+      </div>
+      <p id="surprise-status" class="small text-body-secondary mb-0 mt-2" role="status">曲データを読み込み中です…</p>
+      <div id="surprise-result" class="surprise-result" role="region" aria-labelledby="surprise-song-title" hidden>
+        <div class="surprise-artwork" hidden>
+          <img id="surprise-thumbnail" alt="" loading="lazy" referrerpolicy="no-referrer">
+        </div>
+        <div class="surprise-details">
+          <h3 id="surprise-song-title" aria-live="polite" aria-atomic="true"></h3>
+          <div class="surprise-meta">
+            <span id="surprise-date" class="text-body-secondary" hidden></span>
+            <span id="surprise-song-category" class="badge text-bg-secondary" hidden></span>
+          </div>
+          <p id="surprise-session" class="text-body-secondary" hidden></p>
+          <div class="surprise-actions">
+            <a id="surprise-play" class="btn btn-primary surprise-action" target="_blank" rel="noopener noreferrer">
+              <img class="surprise-icon" src="assets/icons/play-fill.svg" alt="" aria-hidden="true">
+              <span data-surprise-label="listen">YouTubeで聴く</span>
+            </a>
+            <button id="surprise-favorite" type="button" class="btn btn-outline-secondary surprise-action" aria-pressed="false">
+              <span class="surprise-star" aria-hidden="true">☆</span>
+              <span data-surprise-label="favorite">お気に入りに登録</span>
+            </button>
+            <button id="surprise-history" type="button" class="btn btn-outline-primary surprise-action" hidden>
+              <img class="surprise-icon" src="assets/icons/music-note-list.svg" alt="" aria-hidden="true">
+              <span data-surprise-label="history">この曲の歌唱履歴を見る</span>
+            </button>
+            <button id="surprise-again" type="button" class="btn btn-secondary surprise-action">
+              <img class="surprise-icon" src="assets/icons/shuffle.svg" alt="" aria-hidden="true">
+              <span data-surprise-label="again">別の曲を選ぶ</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- フィルタバー -->
     <div class="mb-4 filter-bar">
       <div class="filter-item">
