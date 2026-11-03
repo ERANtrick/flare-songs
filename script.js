@@ -21,6 +21,7 @@ const i18n = {
     fav_toggle_on: "★ お気に入り表示中",
     loading: "読み込み中...",
     no_result: "該当曲がありません",
+    load_more: 'さらに表示（残り{count}件）',
     surprise_heading: 'おまかせで1曲',
     surprise_all: 'すべて',
     surprise_mv: 'MV・カバー曲',
@@ -57,6 +58,7 @@ const i18n = {
     fav_toggle_on: "★ Showing Favorites",
     loading: "Loading...",
     no_result: "No matching songs found",
+    load_more: 'Show more ({count} remaining)',
     surprise_heading: 'Let Flare surprise you',
     surprise_all: 'All categories',
     surprise_mv: 'MVs & covers',
@@ -96,6 +98,12 @@ let songsLoaded = false;
 let favoriteMemory = [];
 let drawHistoryMemory = [];
 let favoriteStorageAvailable = true;
+let favoritesLoaded = false;
+let favoriteKeys = new Set();
+let activeSessionRender = null;
+let accordionLoaders = new WeakMap();
+// 20・50・100件を実測し、初期DOMと追加描画の応答が小さい20件を採用。
+const SESSION_BATCH_SIZE = 20;
 let drawStorageAvailable = true;
 const DRAW_HISTORY_KEY = 'flare-songs:surprise-history:v1';
 const DRAW_HISTORY_LIMIT = 10;
@@ -167,19 +175,30 @@ function updateUILabels() {
   favBtn.classList.toggle("btn-outline-warning", !favOnlyMode);
   updateSurpriseLabels();
   syncFavoriteButtons();
+  activeSessionRender?.updateLabel();
 }
 
 
-function getFavorites() {
-  if (!favoriteStorageAvailable) return [...favoriteMemory];
-  try {
-    const saved = JSON.parse(localStorage.getItem('favorites') || '[]');
-    if (Array.isArray(saved)) favoriteMemory = saved.filter(value => typeof value === 'string');
-  } catch (_) { favoriteStorageAvailable = false; }
+function getFavorites(){
+  if(!favoritesLoaded) refreshFavorites();
   return [...favoriteMemory];
 }
+
+function refreshFavorites() {
+  if (favoriteStorageAvailable) {
+    try {
+      const saved = JSON.parse(localStorage.getItem('favorites') || '[]');
+      favoriteMemory = Array.isArray(saved) ? saved.filter(value => typeof value === 'string') : [];
+    } catch (_) { favoriteStorageAvailable = false; }
+  }
+  favoriteKeys = new Set(favoriteMemory);
+  favoritesLoaded = true;
+}
+
 function saveFavorites(favs) {
   favoriteMemory = [...favs];
+  favoriteKeys = new Set(favs);
+  favoritesLoaded = true;
   try { localStorage.setItem('favorites', JSON.stringify(favs)); } catch (_) { favoriteStorageAvailable = false; }
 }
 function addFavorite(link) {
@@ -194,7 +213,8 @@ function removeFavorite(link) {
   saveFavorites(favs);
 }
 function isFavorite(link) {
-  return getFavorites().includes(link);
+  if (!favoritesLoaded) refreshFavorites();
+  return favoriteKeys.has(link);
 }
 
 function createCardCol(song) {
@@ -205,9 +225,9 @@ function createCardCol(song) {
   if (imgURL) {
     const wrapper = makeElement('div', 'card-img-wrapper');
     const image = makeElement('img');
+    image.loading = 'lazy';
     image.src = imgURL;
     image.alt = title;
-    image.loading = 'lazy';
     wrapper.append(createFavoriteButton(song), image);
     card.append(wrapper);
   }
@@ -242,94 +262,164 @@ function createCardCol(song) {
   return col;
 }
 
-function renderBySession(songs, sortKey) {
-  const c = document.getElementById('song-list');
+function renderBySession(songs,sortKey){
+  const c=document.getElementById('song-list');
   c.classList.remove('accordion');
-  c.innerHTML = '';
-
-  const sessionMap = new Map();
-  for (const s of songs) {
-    const url = s['配信URL'];
-    if (!sessionMap.has(url)) {
-      sessionMap.set(url, {
-        label: `${s['配信日']} ｜ ${s['配信タイトル']}`,
-        date: new Date(s['日付']),
-        items: []
-      });
-    }
-    sessionMap.get(url).items.push(s);
+  c.replaceChildren();
+  const sessionMap=new Map();
+  for(const song of songs){
+    const key=song['配信URL'];
+    if(!sessionMap.has(key)) sessionMap.set(key,{
+      key,label:`${song['配信日']} ｜ ${song['配信タイトル']}`,
+      date:new Date(song['日付']),items:[]
+    });
+    sessionMap.get(key).items.push(song);
   }
+  const sessions=[...sessionMap.values()];
+  if(sortKey==='random') sessions.sort(()=>Math.random()-0.5);
+  else sessions.sort((a,b)=>sortKey==='date-asc'?a.date-b.date:b.date-a.date);
+  for(const session of sessions) session.items.sort((a,b)=>(Number(a['開始秒数'])||0)-(Number(b['開始秒数'])||0));
 
-  const sessions = [...sessionMap.values()];
-  if (sortKey === 'random') sessions.sort(() => Math.random() - 0.5);
-  else sessions.sort((a, b) =>
-    sortKey === 'date-asc' ? a.date - b.date : b.date - a.date
-  );
-
-  const fragment = document.createDocumentFragment();
-
-  sessions.forEach(sess => {
-    const h = document.createElement('h5');
-    h.className = 'mt-4';
-    h.textContent = sess.label;
-    fragment.appendChild(h);
-
-    const row = document.createElement('div');
-    row.className = 'row g-3 mb-3';
-    sess.items.sort((a, b) =>
-      (Number(a['開始秒数']) || 0) - (Number(b['開始秒数']) || 0)
-    );
-    sess.items.forEach(song => row.appendChild(createCardCol(song)));
-    fragment.appendChild(row);
-  });
-
-  c.appendChild(fragment);
+  const more=document.getElementById('load-more-btn');
+  const anchor=document.getElementById('scroll-anchor');
+  const state={revision:viewRevision,sessionIndex:0,itemIndex:0,rendered:0,row:null,observer:null,frame:null};
+  activeSessionRender=state;
+  const valid=()=>activeSessionRender===state&&state.revision===viewRevision;
+  const hasMore=()=>state.sessionIndex<sessions.length;
+  const updateLabel=()=>{
+    more.hidden=!hasMore();
+    more.textContent=i18n[currentLang].load_more.replace('{count}',songs.length-state.rendered);
+  };
+  const schedule=()=>{
+    if(!valid()||!hasMore()||state.frame!==null)return;
+    state.frame=requestAnimationFrame(append);
+  };
+  function append(){
+    state.frame=null;
+    if(!valid())return;
+    const fragment=document.createDocumentFragment();
+    let remaining=SESSION_BATCH_SIZE;
+    while(hasMore()&&remaining>0){
+      const session=sessions[state.sessionIndex];
+      if(state.itemIndex===0){
+        const heading=makeElement('h5','mt-4',session.label);
+        heading.dataset.sessionUrl=session.key||'';
+        state.row=makeElement('div','row g-3 mb-3');
+        state.row.dataset.sessionUrl=session.key||'';
+        fragment.append(heading,state.row);
+      }
+      const cards=document.createDocumentFragment();
+      const count=Math.min(remaining,session.items.length-state.itemIndex);
+      for(let i=0;i<count;i++)cards.append(createCardCol(session.items[state.itemIndex++]));
+      state.row.append(cards);
+      state.rendered+=count;
+      remaining-=count;
+      if(state.itemIndex===session.items.length){
+        state.sessionIndex++;
+        state.itemIndex=0;
+        state.row=null;
+      }
+    }
+    c.append(fragment);
+    updateLabel();
+    if(!hasMore()){
+      state.observer?.disconnect();
+      more.onclick=null;
+    }else if(anchor.getBoundingClientRect().top<window.innerHeight+600){
+      // 一画面に収まる少数の結果でも、observerが再通知しないまま止まらないようにする。
+      schedule();
+    }
+  }
+  state.updateLabel=updateLabel;
+  more.onclick=schedule;
+  append();
+  if(hasMore()&&typeof IntersectionObserver==='function'){
+    state.observer=new IntersectionObserver(entries=>{
+      if(valid()&&entries.some(entry=>entry.isIntersecting))schedule();
+    },{rootMargin:'600px 0px'});
+    state.observer.observe(anchor);
+  }
 }
 
-function renderGrouped(songs) {
-  const c = document.getElementById('song-list');
+function renderGrouped(songs){
+  const revision=viewRevision;
+  const c=document.getElementById('song-list');
   c.classList.add('accordion');
   c.replaceChildren();
-  const sortKey = document.getElementById('sort-session').value;
-  const groups = [...groupSongsByTitle(songs)].map(([title, list]) => {
-    list.sort((a, b) => new Date(a['日付']) - new Date(b['日付']));
-    if (sortKey === 'date-desc') list.reverse();
-    if (sortKey === 'random') list.sort(() => Math.random() - 0.5);
-    return { title, list, repDate: new Date(list[0]['日付']) };
+  const sortKey=document.getElementById('sort-session').value;
+  const groups=[...groupSongsByTitle(songs)].map(([title,list])=>{
+    list.sort((a,b)=>new Date(a['日付'])-new Date(b['日付']));
+    if(sortKey==='date-desc')list.reverse();
+    if(sortKey==='random')list.sort(()=>Math.random()-0.5);
+    return {title,list,repDate:new Date(list[0]['日付'])};
   });
-  if (sortKey !== 'random') {
-    groups.sort((a, b) => sortKey === 'date-asc' ? a.repDate - b.repDate : b.repDate - a.repDate);
-  }
-  const fragment = document.createDocumentFragment();
-  groups.forEach(({ title, list }, i) => {
-    const id = 'grp' + i;
-    const item = makeElement('div', 'accordion-item');
-    item.dataset.songTitle = title;
-    const header = makeElement('h2', 'accordion-header');
-    header.id = 'heading-' + id;
-    const button = makeElement('button', 'accordion-button collapsed', title + ' （' + list.length + '件）');
-    button.type = 'button';
-    button.dataset.bsToggle = 'collapse';
-    button.dataset.bsTarget = '#collapse-' + id;
-    button.setAttribute('aria-expanded', 'false');
-    button.setAttribute('aria-controls', 'collapse-' + id);
+  if(sortKey!=='random')groups.sort((a,b)=>sortKey==='date-asc'?a.repDate-b.repDate:b.repDate-a.repDate);
+  const fragment=document.createDocumentFragment();
+  groups.forEach(({title,list},i)=>{
+    const id='grp'+i;
+    const item=makeElement('div','accordion-item');
+    item.dataset.songTitle=title;
+    const header=makeElement('h2','accordion-header');
+    header.id='heading-'+id;
+    const button=makeElement('button','accordion-button collapsed',title+' （'+list.length+'件）');
+    button.type='button';
+    button.dataset.bsToggle='collapse';
+    button.dataset.bsTarget='#collapse-'+id;
+    button.setAttribute('aria-expanded','false');
+    button.setAttribute('aria-controls','collapse-'+id);
     header.append(button);
-    const collapse = makeElement('div', 'accordion-collapse collapse');
-    collapse.id = 'collapse-' + id;
-    collapse.dataset.bsParent = '#song-list';
-    const body = makeElement('div', 'accordion-body p-0');
-    const row = makeElement('div', 'row g-3 m-3');
-    list.forEach(song => row.append(createCardCol(song)));
+    const collapse=makeElement('div','accordion-collapse collapse');
+    collapse.id='collapse-'+id;
+    collapse.dataset.bsParent='#song-list';
+    const body=makeElement('div','accordion-body p-0');
+    const row=makeElement('div','row g-3 m-3');
+    let loaded=false;
+    const populate=()=>{
+      // 閉じたグループにはカードを作らず、開く直前に全歌唱履歴を作る。
+      if(loaded||revision!==viewRevision||!collapse.isConnected)return;
+      const cards=document.createDocumentFragment();
+      list.forEach(song=>cards.append(createCardCol(song)));
+      row.append(cards);
+      loaded=true;
+    };
+    accordionLoaders.set(collapse,populate);
+    collapse.addEventListener('show.bs.collapse',event=>{
+      if(event.target===collapse)populate();
+    });
+    collapse.addEventListener('hidden.bs.collapse',event=>{
+      if(event.target===collapse&&revision===viewRevision&&!collapse.classList.contains('show')){
+        row.replaceChildren();
+        loaded=false;
+      }
+    });
     body.append(row);
     collapse.append(body);
-    item.append(header, collapse);
+    item.append(header,collapse);
     fragment.append(item);
   });
   c.append(fragment);
 }
 
+function cancelListRender() {
+  if (activeSessionRender) {
+    activeSessionRender.observer?.disconnect();
+    if (activeSessionRender.frame !== null) cancelAnimationFrame(activeSessionRender.frame);
+    activeSessionRender = null;
+  }
+  const more = document.getElementById('load-more-btn');
+  more.hidden = true;
+  more.onclick = null;
+  accordionLoaders = new WeakMap();
+  document.querySelectorAll('#song-list .accordion-collapse').forEach(collapse => {
+    // Bootstrapの保留中コールバックを完了させてから破棄し、旧DOMを保持させない。
+    if (collapse.classList.contains('collapsing')) collapse.dispatchEvent(new Event('transitionend', { bubbles: true }));
+    if (typeof bootstrap !== 'undefined') bootstrap.Collapse.getInstance(collapse)?.dispose();
+  });
+}
+
 function applyView({ revealHistory = false } = {}) {
   const revision = ++viewRevision;
+  cancelListRender();
   showSpinner();
   return new Promise(resolve => {
     setTimeout(() => {
@@ -363,7 +453,9 @@ function applyView({ revealHistory = false } = {}) {
         const item = [...c.querySelectorAll('.accordion-item')].find(node => node.dataset.songTitle === exactSongTitle);
         if (item) {
           // 描画済みDOMを開く。Bootstrapの次回の開閉操作とも状態を合わせる。
-          item.querySelector('.accordion-collapse').classList.add('show');
+          const collapse = item.querySelector('.accordion-collapse');
+          accordionLoaders.get(collapse)?.();
+          collapse.classList.add('show');
           const button = item.querySelector('.accordion-button');
           button.classList.remove('collapsed');
           button.setAttribute('aria-expanded', 'true');
@@ -384,6 +476,14 @@ function applyView({ revealHistory = false } = {}) {
 }
 
 function initUI() {
+  window.addEventListener('storage', event => {
+    if (event.key !== 'favorites' && event.key !== null) return;
+    favoritesLoaded = false;
+    favoriteStorageAvailable = true;
+    refreshFavorites();
+    syncFavoriteButtons();
+    if (favOnlyMode) applyView();
+  });
   const normalView = () => { exactSongTitle = null; return applyView(); };
   document.getElementById('session-select').addEventListener('change', normalView);
   document.getElementById('mode-select').addEventListener('change', (e) => {
@@ -586,7 +686,7 @@ function toggleSongFavorite(song) {
   if (previous) removeFavorite(key);
   else addFavorite(key);
   trackSongEvent(previous ? 'click_fav_remove' : 'click_fav_add', song, key, 'Favorite');
-  syncFavoriteButtons();
+  syncFavoriteButtons(key);
   if (favOnlyMode) applyView();
 }
 
@@ -607,17 +707,22 @@ function updateFavoriteButton(button, active) {
   button.setAttribute('aria-label', i18n[currentLang][active ? 'surprise_remove' : 'surprise_add'] + ': ' + button.dataset.songTitle);
 }
 
-function syncFavoriteButtons() {
-  const favorites = new Set(getFavorites());
-  document.querySelectorAll('[data-favorite-key]').forEach(button => updateFavoriteButton(button, favorites.has(button.dataset.favoriteKey)));
-  if (currentSurprise) {
-    const button = document.getElementById('surprise-favorite');
-    const active = favorites.has(currentSurprise['リンク'] || currentSurprise['配信URL']);
-    button.classList.toggle('active', active);
-    button.setAttribute('aria-pressed', String(active));
-    button.querySelector('.surprise-star').textContent = active ? '★' : '☆';
-    setSurpriseButtonLabel('favorite', active ? 'surprise_remove' : 'surprise_add');
-  }
+function syncFavoriteButtons(key=null){
+  if(!favoritesLoaded)refreshFavorites();
+  document.querySelectorAll('[data-favorite-key]').forEach(button=>{
+    if(key===null||button.dataset.favoriteKey===key)updateFavoriteButton(button,favoriteKeys.has(button.dataset.favoriteKey));
+  });
+  syncSurpriseFavoriteButton();
+}
+
+function syncSurpriseFavoriteButton() {
+  if (!currentSurprise) return;
+  const button = document.getElementById('surprise-favorite');
+  const active = isFavorite(currentSurprise['リンク'] || currentSurprise['配信URL']);
+  button.classList.toggle('active', active);
+  button.setAttribute('aria-pressed', String(active));
+  button.querySelector('.surprise-star').textContent = active ? '★' : '☆';
+  setSurpriseButtonLabel('favorite', active ? 'surprise_remove' : 'surprise_add');
 }
 
 function setSurpriseButtonLabel(name, key, count) {
@@ -678,7 +783,7 @@ function renderSurpriseResult() {
   } else image.removeAttribute('src');
   document.getElementById('surprise-play').href = safeWebURL(song['リンク']);
   document.getElementById('surprise-history').hidden = getPublicHistory(song['曲名']).length < 2;
-  syncFavoriteButtons();
+  syncSurpriseFavoriteButton();
 }
 
 function drawSurprise() {
