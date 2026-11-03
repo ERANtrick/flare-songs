@@ -145,6 +145,65 @@ a:hover {
   color: var(--primary-accent);
 }
 
+/* おまかせで1曲：既存のBootstrapテーマ変数に追従する。 */
+.surprise-area {
+  border: 1px solid var(--bs-border-color);
+  border-top: 3px solid var(--primary-accent);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  background: var(--bs-tertiary-bg);
+}
+.surprise-controls { display: flex; flex-wrap: wrap; gap: 0.75rem 1rem; align-items: flex-end; }
+.surprise-controls h2 { margin: 0 auto 0 0; align-self: center; font-size: 1.25rem; font-weight: 700; }
+.surprise-category-field { flex: 0 1 15rem; min-width: 0; }
+.surprise-category-field label { margin-bottom: 0.25rem; }
+.surprise-action { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; min-height: 44px; padding: 0.5rem 0.9rem; white-space: normal; overflow-wrap: anywhere; }
+.surprise-icon { width: 1.15rem; height: 1.15rem; flex-shrink: 0; }
+.surprise-area .btn-primary { color: #241200 !important; }
+.surprise-area .btn-secondary { opacity: 1; }
+.surprise-area .btn-secondary .surprise-icon { filter: brightness(0) invert(1); }
+.surprise-area .btn-outline-primary {
+  --bs-btn-color: #3366cc;
+  --bs-btn-border-color: #3366cc;
+  --bs-btn-hover-bg: #3366cc;
+  --bs-btn-hover-border-color: #3366cc;
+  --bs-btn-active-bg: #3366cc;
+  --bs-btn-active-border-color: #3366cc;
+}
+.surprise-result { display: grid; grid-template-columns: minmax(0, 260px) minmax(0, 1fr); gap: 1.25rem; border-top: 1px solid var(--bs-border-color); margin-top: 1rem; padding-top: 1rem; overflow-anchor: none; }
+.surprise-result[hidden], .surprise-area [hidden] { display: none !important; }
+.surprise-result:has(.surprise-artwork[hidden]) { grid-template-columns: minmax(0, 1fr); }
+.surprise-artwork { align-self: start; }
+.surprise-artwork img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 0.5rem; }
+.surprise-details { min-width: 0; }
+#surprise-song-title { font-size: clamp(1.4rem, 3vw, 1.8rem); font-weight: 700; overflow-wrap: anywhere; margin-bottom: 0.6rem; }
+.surprise-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem; }
+#surprise-session { overflow-wrap: anywhere; margin-bottom: 1rem; }
+.surprise-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.surprise-actions > * { flex: 1 1 calc(50% - 0.6rem); }
+.surprise-star { font-size: 1.25rem; }
+#song-list .accordion-item { scroll-margin-top: 1rem; }
+.card-title, .accordion-button, .card-body p { overflow-wrap: anywhere; }
+[data-bs-theme="dark"] .surprise-area .btn-outline-primary { --bs-btn-color: #9dbbff; --bs-btn-border-color: #9dbbff; }
+[data-bs-theme="dark"] .surprise-area .btn-outline-secondary { --bs-btn-color: #ced4da; --bs-btn-border-color: #adb5bd; }
+[data-bs-theme="dark"] .surprise-area .btn-outline-primary .surprise-icon,
+.surprise-area .btn-outline-primary:hover .surprise-icon { filter: brightness(0) invert(1); }
+/* 992px未満では右側の情報・ボタンが狭くなるため、結果だけを縦配置にする。 */
+@media (max-width: 991.98px) {
+  .surprise-result { grid-template-columns: minmax(0, 1fr); gap: 0.9rem; }
+  .surprise-artwork { width: min(100%, 280px); justify-self: center; }
+  .surprise-actions { flex-direction: column; }
+  .surprise-actions > * { flex: 0 0 auto; width: 100%; }
+  .surprise-action { min-height: 48px; }
+}
+@media (max-width: 575.98px) {
+  .surprise-area { padding: 0.9rem; }
+  .surprise-controls { gap: 0.65rem; }
+  .surprise-controls h2 { flex-basis: 100%; font-size: 1.15rem; }
+  .surprise-category-field { flex: 1 1 0; }
+  #surprise-pick { flex: 0 0 auto; padding-inline: 0.8rem; }
+}
+
 /* フィルタバー */
 .filter-bar {
   display: flex;
