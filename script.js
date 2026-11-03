@@ -292,7 +292,7 @@ function renderBySession(songs,sortKey){
   const sessions=[...sessionMap.values()];
   if(sortKey==='random') sessions.sort(()=>Math.random()-0.5);
   else sessions.sort((a,b)=>sortKey==='date-asc'?a.date-b.date:b.date-a.date);
-  for(const session of sessions) session.items.sort((a,b)=>(Number(a['開始秒数'])||0)-(Number(b['開始秒数'])||0));
+  for(const session of sessions) session.items = sortSessionSongsByStart(session.items);
 
   const more=document.getElementById('load-more-btn');
   const anchor=document.getElementById('scroll-anchor');
@@ -997,9 +997,8 @@ function getYouTubeVideoID(url) {
   return url.pathname === '/watch' ? url.searchParams.get('v') : url.pathname.split('/').filter(Boolean).pop();
 }
 
-function getPlaybackPoint(value) {
-  const url = new URL(value);
-  const video = getYouTubeVideoID(url);
+// 警告と配信内の曲順で、時刻の解釈と優先順を共有する。
+function getPlaybackStartSeconds(url) {
   const time = url.searchParams.get('t') ?? url.searchParams.get('start') ?? (/^#t=(.*)$/.exec(url.hash)?.[1]);
   let seconds = 0;
   if (time !== undefined && time !== null) {
@@ -1010,7 +1009,28 @@ function getPlaybackPoint(value) {
       seconds = Number(match[1] || 0) * 3600 + Number(match[2] || 0) * 60 + Number(match[3] || 0);
     }
   }
-  return Number.isSafeInteger(seconds) ? video + ':' + seconds : null;
+  return Number.isSafeInteger(seconds) ? seconds : null;
+}
+
+function getPlaybackPoint(value) {
+  const url = new URL(value);
+  const video = getYouTubeVideoID(url);
+  const seconds = getPlaybackStartSeconds(url);
+  return seconds === null ? null : video + ':' + seconds;
+}
+
+function sortSessionSongsByStart(songs) {
+  const timed = songs.map((song, index) => {
+    let seconds = null;
+    try {
+      const url = new URL(song['リンク']);
+      // 空名パラメータもF01の警告対象なので、この配信はCSV順を維持する。
+      if (![...url.searchParams.keys()].some(name => !name.trim())) seconds = getPlaybackStartSeconds(url);
+    } catch (_) { /* 不正URLも配信単位でCSV順へフォールバックする。 */ }
+    return { song, index, seconds };
+  });
+  if (timed.some(item => item.seconds === null)) return songs;
+  return timed.sort((a, b) => a.seconds - b.seconds || a.index - b.index).map(item => item.song);
 }
 
 function publishDataDiagnostics(report) {
