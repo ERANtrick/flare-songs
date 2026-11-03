@@ -37,6 +37,9 @@ const i18n = {
     surprise_loading: '曲データを読み込み中です…',
     surprise_empty: 'このカテゴリには再生できる曲がありません。別のカテゴリを選んでください。',
     surprise_error: '曲データを読み込めませんでした。ページを再読み込みしてください。',
+    load_timeout: '曲データの読み込みに時間がかかりすぎました。再読み込みをお試しください。',
+    load_retry: '再読み込み',
+    data_excluded: '一部の曲データを表示できませんでした（{count}件）。',
   },
   en: {
     mode: "Display Mode",
@@ -74,6 +77,9 @@ const i18n = {
     surprise_loading: 'Loading songs…',
     surprise_empty: 'No playable songs in this category. Please choose another category.',
     surprise_error: 'Songs could not be loaded. Please reload this page.',
+    load_timeout: 'Loading songs took too long. Please try reloading.',
+    load_retry: 'Reload',
+    data_excluded: 'Some song records could not be displayed ({count}).',
   }
 };
 
@@ -95,6 +101,13 @@ let viewRevision = 0;
 let currentSurprise = null;
 let surpriseStatusKey = 'surprise_loading';
 let songsLoaded = false;
+let songLoadState = 'loading';
+let loadErrorKey = 'surprise_error';
+let songLoadRevision = 0;
+let activeSongRequest = null;
+let dataDiagnostics = null;
+const CSV_LOAD_TIMEOUT_MS = 30000;
+const REQUIRED_SONG_HEADERS = ['曲名', '日付', '配信日', '配信タイトル', '配信URL', 'リンク', 'ThumbnailURL', '公開', 'Category'];
 let favoriteMemory = [];
 let drawHistoryMemory = [];
 let favoriteStorageAvailable = true;
@@ -176,6 +189,7 @@ function updateUILabels() {
   updateSurpriseLabels();
   syncFavoriteButtons();
   activeSessionRender?.updateLabel();
+  renderDataNotice();
 }
 
 
@@ -420,10 +434,14 @@ function cancelListRender() {
 function applyView({ revealHistory = false } = {}) {
   const revision = ++viewRevision;
   cancelListRender();
+  if (songLoadState !== 'ready') {
+    renderListLoadState();
+    return Promise.resolve(false);
+  }
   showSpinner();
   return new Promise(resolve => {
     setTimeout(() => {
-      if (revision !== viewRevision) return resolve(false);
+      if (revision !== viewRevision || songLoadState !== 'ready') return resolve(false);
       const mode = document.getElementById('mode-select').value;
       const session = document.getElementById('session-select').value;
       const category = document.getElementById('category-select').value;
@@ -861,6 +879,241 @@ function initSortSelect() {
   };
 }
 
+// PapaParse 5.3.2のmeta.fieldsは重複を残す。後続版のrenamedHeadersには依存しない。
+function validateSongCSV({ data, errors, meta } = {}) {
+  const report = { totalRows: Array.isArray(data) ? data.length : 0, acceptedRows: 0,
+    publicRows: Array.isArray(data) ? data.filter(song => song?.['公開'] === '公開').length : 0,
+    acceptedPublicRows: 0, excludedRows: 0, ignoredBlankRows: 0, issues: [], counts: {} };
+  const issue = (severity, code, row, details = {}) => {
+    // rowはヘッダーを除いた1始まりのデータレコード番号。引用符内の改行では増やさない。
+    report.issues.push({ severity, code, row: row === null ? null : row + 1, ...details });
+  };
+  const fields = meta?.fields;
+  if (!Array.isArray(data) || !Array.isArray(errors) || !Array.isArray(fields)) {
+    issue('fatal', 'invalid_parse_result', null);
+  } else {
+    const seen = new Set();
+    fields.forEach(field => {
+      const name = typeof field === 'string' ? field.trim() : '';
+      if (seen.has(name)) issue('fatal', 'duplicate_header', null, { field });
+      seen.add(name);
+    });
+    REQUIRED_SONG_HEADERS.forEach(field => {
+      if (!fields.includes(field)) issue('fatal', 'missing_header', null, { field });
+    });
+    if (meta.aborted || meta.truncated) issue('fatal', 'incomplete_parse', null);
+  }
+  const invalidRows = new Set();
+  for (const error of Array.isArray(errors) ? errors : []) {
+    const row = error.row;
+    if (error.type === 'FieldMismatch' && Number.isInteger(row) && row >= 0 && row < report.totalRows) {
+      invalidRows.add(row);
+      // 末尾の空行は後で除外し、警告や不正行数には含めない。
+      if (Object.values(data[row]).some(value => Array.isArray(value) ? value.some(Boolean) : String(value ?? '').trim())) {
+        issue('error', error.code, row);
+      }
+    } else {
+      // 引用符異常はレコード境界を保証できないため、部分的な復旧を試みない。
+      // 5.3.2のQuotes.rowはヘッダーを含むが、FieldMismatch.rowは含まない。
+      const dataRow = error.type === 'Quotes' ? (row > 0 ? row - 1 : null) : row;
+      issue('fatal', error.code || 'parse_error', Number.isInteger(dataRow) ? dataRow : null, { type: error.type });
+    }
+  }
+  const songs = [];
+  const playbackPoints = new Map();
+  if (!report.issues.some(item => item.severity === 'fatal')) {
+    data.forEach((song, row) => {
+      if (!Object.values(song).some(value => Array.isArray(value) ? value.some(Boolean) : String(value ?? '').trim())) {
+        report.ignoredBlankRows++;
+        return;
+      }
+      if (invalidRows.has(row)) { report.excludedRows++; return; }
+      if (song['公開'] !== '公開') {
+        if (song['公開'] !== '非公開') issue('warning', 'unknown_visibility', row, { value: song['公開'] });
+        songs.push(song);
+        return;
+      }
+      const missing = ['曲名', '日付', '配信日', '配信タイトル', '配信URL', 'リンク']
+        .filter(field => typeof song[field] !== 'string' || !song[field].trim());
+      let invalid = false;
+      if (missing.length) { issue('error', 'missing_required_value', row, { fields: missing, title: song['曲名'] }); invalid = true; }
+      if (!missing.includes('日付') && !isValidSongDate(song['日付'])) {
+        issue('error', 'invalid_date', row, { field: '日付', value: song['日付'] }); invalid = true;
+      }
+      const youtubeURLs = new Map();
+      for (const field of ['配信URL', 'リンク']) {
+        if (missing.includes(field)) continue;
+        if (!isPlayableYouTubeLink(song[field])) {
+          issue('error', 'invalid_youtube_url', row, { field, value: song[field] }); invalid = true;
+        } else youtubeURLs.set(field, new URL(song[field]));
+      }
+      if (youtubeURLs.size === 2) {
+        const streamVideoID = getYouTubeVideoID(youtubeURLs.get('配信URL'));
+        const linkVideoID = getYouTubeVideoID(youtubeURLs.get('リンク'));
+        if (streamVideoID !== linkVideoID) {
+          issue('warning', 'video_id_mismatch', row, { fields: ['配信URL', 'リンク'], streamVideoID, linkVideoID, title: song['曲名'] });
+        }
+      }
+      const linkURL = youtubeURLs.get('リンク');
+      if (linkURL && [...linkURL.searchParams.keys()].some(name => !name.trim())) {
+        issue('warning', 'empty_query_parameter', row, { field: 'リンク', value: song['リンク'], title: song['曲名'] });
+      }
+      if (invalid) { report.excludedRows++; return; }
+      if (!Object.prototype.hasOwnProperty.call(categoryTranslations, song.Category)) {
+        issue('warning', 'unknown_category', row, { field: 'Category', value: song.Category });
+      }
+      if (!safeWebURL(song.ThumbnailURL)) {
+        issue('warning', song.ThumbnailURL ? 'invalid_thumbnail_url' : 'missing_thumbnail', row, { field: 'ThumbnailURL' });
+      }
+      // 時刻は重複警告にだけ使用する。配信内の曲順・保存キー・元の値は変えない。
+      const point = getPlaybackPoint(song['リンク']);
+      if (point === null) issue('warning', 'invalid_start_time', row, { field: 'リンク', value: song['リンク'] });
+      else if (playbackPoints.has(point)) {
+        issue('warning', 'duplicate_playback_point', row, { field: 'リンク', relatedRows: [playbackPoints.get(point) + 1, row + 1], value: song['リンク'] });
+      } else playbackPoints.set(point, row);
+      songs.push(song);
+      report.acceptedPublicRows++;
+    });
+  }
+  if (report.publicRows > 0 && report.acceptedPublicRows === 0 && !report.issues.some(item => item.severity === 'fatal')) {
+    issue('fatal', 'all_public_rows_excluded', null, {
+      relatedRows: data.flatMap((song, row) => song['公開'] === '公開' ? [row + 1] : [])
+    });
+  }
+  report.acceptedRows = songs.length;
+  report.issues.forEach(item => { report.counts[item.code] = (report.counts[item.code] || 0) + 1; });
+  return { songs, report, fatal: report.issues.some(item => item.severity === 'fatal') };
+}
+
+function isValidSongDate(value) {
+  const match = /^(\d{4})([/-])(\d{1,2})\2(\d{1,2})$/.exec(value);
+  if (!match) return false;
+  const [, year, , month, day] = match;
+  const date = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+  return date.getUTCFullYear() === Number(year) && date.getUTCMonth() === Number(month) - 1 && date.getUTCDate() === Number(day);
+}
+
+function getYouTubeVideoID(url) {
+  return url.pathname === '/watch' ? url.searchParams.get('v') : url.pathname.split('/').filter(Boolean).pop();
+}
+
+function getPlaybackPoint(value) {
+  const url = new URL(value);
+  const video = getYouTubeVideoID(url);
+  const time = url.searchParams.get('t') ?? url.searchParams.get('start') ?? (/^#t=(.*)$/.exec(url.hash)?.[1]);
+  let seconds = 0;
+  if (time !== undefined && time !== null) {
+    if (/^\d+$/.test(time)) seconds = Number(time);
+    else {
+      const match = /^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?$/.exec(time);
+      if (!match || !time) return null;
+      seconds = Number(match[1] || 0) * 3600 + Number(match[2] || 0) * 60 + Number(match[3] || 0);
+    }
+  }
+  return Number.isSafeInteger(seconds) ? video + ':' + seconds : null;
+}
+
+function publishDataDiagnostics(report) {
+  dataDiagnostics = { state: songLoadState, checkedAt: new Date().toISOString(), ...report };
+  if (report.issues.length) {
+    console.warn('[flare-songs] CSV check:', report.counts, 'Details: flareSongsDiagnostics()');
+  }
+}
+
+function renderDataNotice() {
+  const notice = document.getElementById('data-notice');
+  const count = songLoadState === 'ready' ? dataDiagnostics?.excludedRows || 0 : 0;
+  notice.hidden = !count;
+  notice.textContent = count ? i18n[currentLang].data_excluded.replace('{count}', count) : '';
+}
+
+function renderListLoadState() {
+  if (songLoadState === 'loading') return showSpinner();
+  const container = document.getElementById('song-list');
+  container.classList.remove('accordion');
+  const area = makeElement('div', 'text-center my-4');
+  const message = makeElement('p', 'text-body-secondary', i18n[currentLang][loadErrorKey]);
+  message.setAttribute('role', 'alert');
+  const retry = makeElement('button', 'btn btn-outline-secondary', i18n[currentLang].load_retry);
+  retry.type = 'button';
+  retry.dataset.reloadSongs = '';
+  retry.addEventListener('click', () => {
+    if (typeof Papa === 'undefined') window.location.reload();
+    else loadSongs();
+  });
+  area.append(message, retry);
+  container.replaceChildren(area);
+}
+
+function setSongLoadState(state, errorKey = 'surprise_error') {
+  songLoadState = state;
+  songsLoaded = state === 'ready';
+  loadErrorKey = errorKey;
+  surpriseStatusKey = state === 'ready' ? '' : state === 'loading' ? 'surprise_loading' : errorKey;
+  document.getElementById('surprise-pick').disabled = !songsLoaded;
+}
+
+// 5.3.2にはdownloadTimeoutがないため、通信はXMLHttpRequestのtimeout/abortで管理する。
+function loadSongs({ timeoutMs = CSV_LOAD_TIMEOUT_MS } = {}) {
+  const revision = ++songLoadRevision;
+  activeSongRequest?.abort();
+  activeSongRequest = null;
+  ++viewRevision;
+  cancelListRender();
+  allSongs = [];
+  currentSurprise = null;
+  exactSongTitle = null;
+  dataDiagnostics = null;
+  setSongLoadState('loading');
+  initSessionSelect();
+  initCategory();
+  updateUILabels();
+  renderSurpriseResult();
+  renderListLoadState();
+  let settled = false;
+  const current = () => revision === songLoadRevision && !settled;
+  const fail = (code, errorKey = 'surprise_error', report = null) => {
+    if (!current()) return;
+    settled = true;
+    activeSongRequest = null;
+    setSongLoadState('error', errorKey);
+    publishDataDiagnostics(report || { totalRows: 0, acceptedRows: 0, acceptedPublicRows: 0, excludedRows: 0,
+      issues: [{ severity: 'fatal', code, row: null }], counts: { [code]: 1 } });
+    renderSurpriseResult();
+    renderDataNotice();
+    renderListLoadState();
+  };
+  if (typeof Papa === 'undefined') return fail('parser_unavailable');
+  const request = new XMLHttpRequest();
+  activeSongRequest = request;
+  request.onload = () => {
+    if (!current()) return;
+    if (request.status < 200 || request.status >= 300) return fail('http_error');
+    let validation;
+    try {
+      validation = validateSongCSV(Papa.parse(request.responseText, { header: true, delimiter: ',', skipEmptyLines: false }));
+    } catch (_) { return fail('parse_exception'); }
+    if (validation.fatal) return fail('invalid_csv', 'surprise_error', validation.report);
+    settled = true;
+    activeSongRequest = null;
+    allSongs = validation.songs;
+    setSongLoadState('ready');
+    publishDataDiagnostics(validation.report);
+    initSessionSelect();
+    initCategory();
+    updateUILabels();
+    applyView();
+  };
+  request.onerror = () => fail('network_error');
+  request.ontimeout = () => fail('timeout', 'load_timeout');
+  request.onabort = () => fail('request_aborted');
+  try {
+    request.open('GET', CSV_URL, true);
+    request.timeout = timeoutMs;
+    request.send();
+  } catch (_) { fail('network_error'); }
+}
+
 window.addEventListener('DOMContentLoaded', () => {
   // UIイベントはCSV完了時や言語変更時には再登録しない。
   initLanguageToggle();
@@ -870,28 +1123,7 @@ window.addEventListener('DOMContentLoaded', () => {
   initCategory();
   initUI();
   initSurprise();
-  updateUILabels();
-  const failLoading = () => {
-    songsLoaded = false;
-    surpriseStatusKey = 'surprise_error';
-    updateSurpriseLabels();
-    document.getElementById('song-list').replaceChildren(makeElement('p', 'text-center text-body-secondary my-4', i18n[currentLang].surprise_error));
-  };
-  if (typeof Papa === 'undefined') return failLoading();
-  Papa.parse(CSV_URL, {
-    download: true,
-    header: true,
-    complete: ({ data }) => {
-      if (!data.some(song => Object.hasOwn(song, '曲名') && Object.hasOwn(song, '公開'))) return failLoading();
-      allSongs = data;
-      songsLoaded = true;
-      surpriseStatusKey = '';
-      document.getElementById('surprise-pick').disabled = false;
-      initSessionSelect();
-      initCategory();
-      updateUILabels();
-      applyView();
-    },
-    error: failLoading
-  });
+  // 診断は要求時だけ詳細を返す。画面には除外件数だけを表示する。
+  window.flareSongsDiagnostics = () => JSON.parse(JSON.stringify(dataDiagnostics));
+  loadSongs();
 });
