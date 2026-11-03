@@ -4,7 +4,9 @@
   --secondary-accent: #3366CC;
   --bg-base:          #FFFFFF;
   --text-base:        #000000;
+  --accent-ink:       #a64b00;
 }
+[data-bs-theme="dark"] { --accent-ink: #ff9a36; }
 
 /* 全体 */
 @include color-mode(light){
@@ -30,7 +32,7 @@
 h1 {
   font-size: 2rem;
   font-weight: bold;
-  color: var(--primary-accent);
+  color: var(--accent-ink);
   text-align: center;
   margin-bottom: 0.5rem;
   border-bottom: 3px solid var(--secondary-accent);
@@ -49,7 +51,7 @@ h1 small {
 .btn-primary {
   background-color: var(--primary-accent) !important;
   border-color:     var(--primary-accent) !important;
-  color:            #fff !important;
+  color:            #241200 !important;
   font-weight: bold;
   box-shadow: 0 2px 8px rgba(255, 128, 0, 0.4);
   font-size: 1rem;
@@ -63,8 +65,30 @@ h1 small {
 }
 
 /* お気に入り切替ボタン */
+#fav-only-btn {
+  --bs-btn-color: var(--accent-ink);
+  --bs-btn-bg: transparent;
+  --bs-btn-border-color: var(--accent-ink);
+  --bs-btn-hover-color: #241200;
+  --bs-btn-hover-bg: #ff8000;
+  --bs-btn-hover-border-color: #ff8000;
+  --bs-btn-active-color: #241200;
+  --bs-btn-active-bg: #ff8000;
+  --bs-btn-active-border-color: #ff8000;
+}
 #fav-only-btn.active {
   font-weight: bold;
+}
+#song-list .btn-secondary { opacity: 1; }
+[data-bs-theme="dark"] .filter-bar .btn-outline-secondary,
+[data-bs-theme="dark"] #load-more-btn,
+[data-bs-theme="dark"] #song-list .btn-outline-secondary {
+  --bs-btn-color: #ced4da;
+  --bs-btn-border-color: #adb5bd;
+  --bs-btn-hover-color: #212529;
+  --bs-btn-hover-bg: #ced4da;
+  --bs-btn-active-color: #212529;
+  --bs-btn-active-bg: #ced4da;
 }
 
 /* お気に入りマーク */
@@ -72,10 +96,10 @@ h1 small {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
-  background-color: rgba(255, 255, 255, 0.85); /* 白背景・透明度あり */
+  background-color: #fff; /* 画像に左右されず星のコントラストを保つ。 */
   border: none;
   font-size: 1.4rem;
-  color: #ccc;
+  color: #595959;
   border-radius: 50%;
   width: 2.2rem;
   height: 2.2rem;
@@ -91,12 +115,12 @@ h1 small {
 .fav-btn:hover {
   transform: scale(1.15);
   background-color: rgba(255, 255, 255, 1);
-  color: var(--primary-accent);
+  color: #9b4900;
   box-shadow: 0 0 8px rgba(255, 128, 0, 0.4);
 }
 
 .fav-btn.active {
-  color: var(--primary-accent);
+  color: #9b4900;
 }
 
 
@@ -130,8 +154,9 @@ h1 small {
 /* アコーディオン開閉ヘッダー */
 .accordion-button:not(.collapsed) {
   background-color: var(--primary-accent);
-  color: #fff;
+  color: #241200;
 }
+.accordion-button:not(.collapsed)::after { filter: brightness(0); }
 
 /* フォーカス時 */
 .form-select:focus,
@@ -142,7 +167,19 @@ h1 small {
 
 /* リンクホバー */
 a:hover {
-  color: var(--primary-accent);
+  color: var(--accent-ink);
+}
+
+/* 一覧とフィルタ操作のキーボード位置を背景色に埋もれさせない。 */
+#song-list :is(a, button):focus-visible,
+.filter-bar :is(button, select, input):focus-visible,
+#load-more-btn:focus-visible {
+  outline: 2px solid var(--bs-emphasis-color);
+  outline-offset: 3px;
+}
+#song-list .fav-btn:focus-visible {
+  outline-color: #161616;
+  box-shadow: 0 0 0 2px #fff;
 }
 
 /* テーマ切替：控えめな表示とキーボード用フォーカス。 */

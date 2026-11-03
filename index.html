@@ -147,12 +147,14 @@
       </div>
       <div class="filter-item fav-toggle">
         <label class="form-label small invisible">お気に入り</label>
-        <button id="fav-only-btn" class="btn btn-outline-warning btn-sm">★ お気に入りだけ表示</button>
+        <button id="fav-only-btn" class="btn btn-outline-warning btn-sm" aria-pressed="false">★ お気に入りだけ表示</button>
       </div>
     </div>
 
     <!-- リストエリア -->
     <p id="data-notice" class="small text-body-secondary" role="status" hidden></p>
+    <p id="result-summary" class="small text-body-secondary mb-3" hidden></p>
+    <div id="result-announcement" class="visually-hidden" role="status" aria-atomic="true"></div>
     <div id="song-list" class="accordion"></div>
     <div id="scroll-anchor" style="height: 1px;" aria-hidden="true"></div>
     <button id="load-more-btn" type="button" class="btn btn-outline-secondary" aria-controls="song-list" hidden>さらに表示</button>

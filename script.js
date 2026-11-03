@@ -23,6 +23,9 @@ const i18n = {
     loading: "読み込み中...",
     no_result: "該当曲がありません",
     load_more: 'さらに表示（残り{count}件）',
+    result_sessions: '歌唱記録 {total}件（{shown}件表示中）',
+    result_groups: '曲名 {groups}件・歌唱履歴 {total}件',
+    result_added: '追加表示しました。{summary}',
     surprise_heading: 'おまかせで1曲',
     surprise_all: 'すべて',
     surprise_mv: 'MV・カバー曲',
@@ -64,6 +67,9 @@ const i18n = {
     loading: "Loading...",
     no_result: "No matching songs found",
     load_more: 'Show more ({count} remaining)',
+    result_sessions: 'Song records: {total} ({shown} shown)',
+    result_groups: 'Song titles: {groups} · Performances: {total}',
+    result_added: 'More results displayed. {summary}',
     surprise_heading: 'Let Flare surprise you',
     surprise_all: 'All categories',
     surprise_mv: 'MVs & covers',
@@ -100,6 +106,9 @@ let allCategories = [];
 let favOnlyMode = false;
 let exactSongTitle = null; // 通常の部分一致検索とは別の、履歴表示専用の条件。
 let viewRevision = 0;
+let viewInteractionVersion = 0;
+let resultSummary = null;
+let resultAnnouncementTimer = null;
 let currentSurprise = null;
 let surpriseStatusKey = 'surprise_loading';
 let songsLoaded = false;
@@ -192,6 +201,7 @@ function updateUILabels() {
   // お気に入りボタンの表示内容とクラスの統一（ここを追加）
   const favBtn = document.getElementById("fav-only-btn");
   favBtn.textContent = favOnlyMode ? t.fav_toggle_on : t.fav_toggle_off;
+  favBtn.setAttribute('aria-pressed', String(favOnlyMode));
 
   favBtn.classList.toggle("active", favOnlyMode);
   favBtn.classList.toggle("btn-warning", favOnlyMode);
@@ -313,6 +323,7 @@ function renderBySession(songs,sortKey){
   const updateLabel=()=>{
     more.hidden=!hasMore();
     more.textContent=i18n[currentLang].load_more.replace('{count}',songs.length-state.rendered);
+    setResultSummary({kind:'session',total:songs.length,shown:state.rendered});
   };
   const schedule=()=>{
     if(!valid()||!hasMore()||state.frame!==null)return;
@@ -346,6 +357,10 @@ function renderBySession(songs,sortKey){
     }
     c.append(fragment);
     updateLabel();
+    if(state.announceNext){
+      state.announceNext=false;
+      queueResultAnnouncement(true);
+    }
     if(!hasMore()){
       state.observer?.disconnect();
       more.onclick=null;
@@ -355,7 +370,19 @@ function renderBySession(songs,sortKey){
     }
   }
   state.updateLabel=updateLabel;
-  more.onclick=schedule;
+  // フォーカス引継ぎで必要な位置まで、既存と同じ20件単位で描画する。
+  state.ensureFavoriteVisible=async(key,canRestore)=>{
+    if(!songs.some(song=>(song['リンク']||song['配信URL'])===key))return null;
+    while(valid()&&canRestore()){
+      const target=findListFavoriteButton(key);
+      if(target)return target;
+      if(!hasMore())break;
+      schedule();
+      await new Promise(requestAnimationFrame);
+    }
+    return null;
+  };
+  more.onclick=()=>{state.announceNext=true;schedule();};
   append();
   if(hasMore()&&typeof IntersectionObserver==='function'){
     state.observer=new IntersectionObserver(entries=>{
@@ -438,6 +465,42 @@ function renderGrouped(songs){
     fragment.append(item);
   });
   c.append(fragment);
+  setResultSummary({kind:'grouped',total:songs.length,groups:groups.length});
+}
+
+function resultSummaryText() {
+  if (!resultSummary) return '';
+  return i18n[currentLang][resultSummary.kind === 'session' ? 'result_sessions' : 'result_groups']
+    .replace('{total}', resultSummary.total).replace('{shown}', resultSummary.shown ?? 0)
+    .replace('{groups}', resultSummary.groups ?? 0);
+}
+
+function setResultSummary(summary) {
+  resultSummary = summary;
+  const node = document.getElementById('result-summary');
+  node.hidden = false;
+  node.textContent = resultSummaryText();
+}
+
+function clearResultSummary() {
+  clearTimeout(resultAnnouncementTimer);
+  resultAnnouncementTimer = null;
+  resultSummary = null;
+  const node = document.getElementById('result-summary');
+  node.hidden = true;
+  node.textContent = '';
+  document.getElementById('result-announcement').textContent = '';
+}
+
+function queueResultAnnouncement(manual = false) {
+  clearTimeout(resultAnnouncementTimer);
+  const revision = viewRevision;
+  resultAnnouncementTimer = setTimeout(() => {
+    if (revision !== viewRevision || songLoadState !== 'ready' || !resultSummary) return;
+    const text = resultSummaryText();
+    document.getElementById('result-announcement').textContent = manual
+      ? i18n[currentLang].result_added.replace('{summary}', text) : text;
+  }, manual ? 0 : 500);
 }
 
 function cancelListRender() {
@@ -459,6 +522,7 @@ function cancelListRender() {
 
 function applyView({ revealHistory = false } = {}) {
   const revision = ++viewRevision;
+  clearResultSummary();
   cancelListRender();
   if (songLoadState !== 'ready') {
     renderListLoadState();
@@ -486,13 +550,17 @@ function applyView({ revealHistory = false } = {}) {
         if (kw) list = list.filter(s => (s['曲名'] || '').toLowerCase().includes(kw));
       }
       const c = document.getElementById('song-list');
+      const grouped = mode !== 'session' || !!kw || exactSongTitle !== null;
       if (!list.length) {
         c.classList.remove('accordion');
         c.replaceChildren(makeElement('div', 'text-center my-5 text-muted', i18n[currentLang].no_result));
+        setResultSummary({kind:grouped?'grouped':'session',total:0,shown:0,groups:0});
+        queueResultAnnouncement();
         return resolve(true);
       }
       if (mode === 'session' && !kw && exactSongTitle === null) renderBySession(list, sort);
       else renderGrouped(list);
+      queueResultAnnouncement();
       if (exactSongTitle !== null) {
         const item = [...c.querySelectorAll('.accordion-item')].find(node => node.dataset.songTitle === exactSongTitle);
         if (item) {
@@ -520,6 +588,10 @@ function applyView({ revealHistory = false } = {}) {
 }
 
 function initUI() {
+  // 次の操作が始まったら、古い描画からキーボードフォーカスを戻さない。
+  for (const name of ['keydown', 'pointerdown']) {
+    document.addEventListener(name, () => { ++viewInteractionVersion; }, true);
+  }
   window.addEventListener('storage', event => {
     if (event.key !== 'favorites' && event.key !== null) return;
     favoritesLoaded = false;
@@ -723,7 +795,7 @@ function trackSongEvent(name, song, link, category) {
   }
 }
 
-function toggleSongFavorite(song) {
+function toggleSongFavorite(song, focusRequest = null) {
   const key = song['リンク'] || song['配信URL'];
   if (!key) return;
   const previous = isFavorite(key);
@@ -731,7 +803,64 @@ function toggleSongFavorite(song) {
   else addFavorite(key);
   trackSongEvent(previous ? 'click_fav_remove' : 'click_fav_add', song, key, 'Favorite');
   syncFavoriteButtons(key);
-  if (favOnlyMode) applyView();
+  if (favOnlyMode) {
+    const rendering = applyView();
+    const revision = viewRevision;
+    if (focusRequest) rendering.then(done => { if (done) restoreFavoriteFocus(focusRequest, revision); });
+  }
+}
+
+function findListFavoriteButton(key) {
+  return [...document.querySelectorAll('#song-list [data-favorite-key]')]
+    .find(button => button.dataset.favoriteKey === key);
+}
+
+function captureFavoriteFocus(button) {
+  const buttons = [...document.querySelectorAll('#song-list [data-favorite-key]')];
+  const index = buttons.indexOf(button);
+  const candidates = [...buttons.slice(index + 1), ...buttons.slice(0, index).reverse()]
+    .filter(node => node.dataset.favoriteKey !== button.dataset.favoriteKey)
+    .map(node => ({key:node.dataset.favoriteKey, title:node.dataset.songTitle}));
+  const items = [...document.querySelectorAll('#song-list .accordion-item')];
+  const groupIndex = items.indexOf(button.closest('.accordion-item'));
+  const groups = [...items.slice(groupIndex + 1), ...items.slice(0, groupIndex).reverse()]
+    .map(item => item.dataset.songTitle);
+  return {candidates, groups, interaction:viewInteractionVersion};
+}
+
+async function restoreFavoriteFocus(request, revision) {
+  const canRestore = () => revision === viewRevision && songLoadState === 'ready'
+    && request.interaction === viewInteractionVersion && document.activeElement === document.body;
+  const openGroup = title => {
+    const item = [...document.querySelectorAll('#song-list .accordion-item')]
+      .find(node => node.dataset.songTitle === title);
+    if (!item) return null;
+    const collapse = item.querySelector('.accordion-collapse');
+    accordionLoaders.get(collapse)?.();
+    collapse.classList.add('show');
+    const button = item.querySelector('.accordion-button');
+    button.classList.remove('collapsed');
+    button.setAttribute('aria-expanded', 'true');
+    return item;
+  };
+  for (const candidate of request.candidates) {
+    if (!canRestore()) return;
+    if (!favoriteKeys.has(candidate.key)) continue;
+    let target = findListFavoriteButton(candidate.key);
+    if (!target && activeSessionRender) target = await activeSessionRender.ensureFavoriteVisible(candidate.key, canRestore);
+    if (!canRestore()) return;
+    if (!target) { openGroup(candidate.title); target = findListFavoriteButton(candidate.key); }
+    if (target) { target.focus(); return; }
+  }
+  if (!canRestore()) return;
+  const groups = [...new Set([...request.groups,
+    ...[...document.querySelectorAll('#song-list .accordion-item')].map(item => item.dataset.songTitle)])];
+  for (const title of groups) {
+    const target = openGroup(title)?.querySelector('[data-favorite-key]');
+    if (target) { target.focus(); return; }
+  }
+  const target = document.querySelector('#song-list [data-favorite-key]') || document.getElementById('fav-only-btn');
+  target.focus({preventScroll:target.id === 'fav-only-btn'});
 }
 
 function createFavoriteButton(song) {
@@ -740,7 +869,11 @@ function createFavoriteButton(song) {
   button.dataset.favoriteKey = song['リンク'] || song['配信URL'] || '';
   button.dataset.songTitle = song['曲名'] || '（曲名なし）';
   updateFavoriteButton(button, isFavorite(button.dataset.favoriteKey));
-  button.addEventListener('click', () => toggleSongFavorite(song));
+  button.addEventListener('click', event => {
+    const request = favOnlyMode && isFavorite(button.dataset.favoriteKey)
+      && event.detail === 0 && document.activeElement === button ? captureFavoriteFocus(button) : null;
+    toggleSongFavorite(song, request);
+  });
   return button;
 }
 
@@ -1075,6 +1208,7 @@ function renderDataNotice() {
 }
 
 function renderListLoadState() {
+  clearResultSummary();
   if (songLoadState === 'loading') return showSpinner();
   const container = document.getElementById('song-list');
   container.classList.remove('accordion');
