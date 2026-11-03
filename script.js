@@ -117,6 +117,8 @@ let favoritesLoaded = false;
 let favoriteKeys = new Set();
 let activeSessionRender = null;
 let accordionLoaders = new WeakMap();
+// 並び順の選択中は、絞り込み前の全曲名の順位をCSVデータ単位で保持する。
+let randomSongTitleRanks = new WeakMap();
 // 20・50・100件を実測し、初期DOMと追加描画の応答が小さい20件を採用。
 const SESSION_BATCH_SIZE = 20;
 let drawStorageAvailable = true;
@@ -363,6 +365,20 @@ function renderBySession(songs,sortKey){
   }
 }
 
+function getRandomSongTitleRanks() {
+  let ranks = randomSongTitleRanks.get(allSongs);
+  if (!ranks) {
+    const titles = [...groupSongsByTitle(allSongs.filter(song => song['公開'] === '公開')).keys()];
+    for (let i = titles.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [titles[i], titles[j]] = [titles[j], titles[i]];
+    }
+    ranks = new Map(titles.map((title, index) => [title, index]));
+    randomSongTitleRanks.set(allSongs, ranks);
+  }
+  return ranks;
+}
+
 function renderGrouped(songs){
   const revision=viewRevision;
   const c=document.getElementById('song-list');
@@ -371,11 +387,13 @@ function renderGrouped(songs){
   const sortKey=document.getElementById('sort-session').value;
   const groups=[...groupSongsByTitle(songs)].map(([title,list])=>{
     list.sort((a,b)=>new Date(a['日付'])-new Date(b['日付']));
-    if(sortKey==='date-desc')list.reverse();
-    if(sortKey==='random')list.sort(()=>Math.random()-0.5);
+    if(sortKey!=='date-asc')list.reverse();
     return {title,list,repDate:new Date(list[0]['日付'])};
   });
-  if(sortKey!=='random')groups.sort((a,b)=>sortKey==='date-asc'?a.repDate-b.repDate:b.repDate-a.repDate);
+  if(sortKey==='random'){
+    const ranks=getRandomSongTitleRanks();
+    groups.sort((a,b)=>ranks.get(a.title)-ranks.get(b.title));
+  }else groups.sort((a,b)=>sortKey==='date-asc'?a.repDate-b.repDate:b.repDate-a.repDate);
   const fragment=document.createDocumentFragment();
   groups.forEach(({title,list},i)=>{
     const id='grp'+i;
@@ -873,6 +891,7 @@ function initSortSelect() {
 
   ss.onchange = (e) => {
     const selectedSort = e.target.value;
+    randomSongTitleRanks = new WeakMap();
 
     // GAイベント送信
     if (typeof gtag === 'function') {
