@@ -278,3 +278,7 @@ a:hover {
     font-size: 0.85rem;
   }
 }
+
+/* 段階表示の手動操作。IntersectionObserverが使えない環境でも全件へ進める。 */
+#load-more-btn { display: block; margin: 1rem auto; min-height: 44px; }
+#load-more-btn[hidden] { display: none !important; }
