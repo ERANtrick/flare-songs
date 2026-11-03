@@ -214,6 +214,9 @@ a:hover {
 .filter-item {
   display: flex;
   flex-direction: column;
+  /* 長い配信名でも、項目をフィルタバーの幅以内に収める。 */
+  min-width: 0;
+  max-width: 100%;
 }
 .filter-item label {
   margin-bottom: 0.25rem;
