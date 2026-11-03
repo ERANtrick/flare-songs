@@ -4,6 +4,7 @@ const i18n = {
   ja: {
     mode: "表示モード",
     darkmode: "ダークモード",
+    lightmode: "ライトモード",
     mode_session: "配信枠一覧 | Stream Sessions",
     mode_song: "曲名一覧 | Song List",
     session: "配信を選択",
@@ -44,6 +45,7 @@ const i18n = {
   en: {
     mode: "Display Mode",
     darkmode: "Dark Mode",
+    lightmode: "Light Mode",
     mode_session: "Stream Sessions",
     mode_song: "Song List",
     session: "Select Stream",
@@ -153,16 +155,22 @@ function initLanguageToggle() {
     });
   }
 }
-//pre process
-document.documentElement.getAttribute('data-bs-theme') === 'auto' && document.documentElement.setAttribute('data-bs-theme',window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 function initDarkmodeToggle() {
   const darkmode = document.getElementById("dark-mode-btn");
   if (darkmode) {
-    darkmode.addEventListener("click",(e)=>{
-      e.preventDefault();
-      document.documentElement.setAttribute('data-bs-theme',document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark');
+    darkmode.addEventListener("click",()=>{
+      const theme = document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-bs-theme', theme);
+      // headでの初期復元と同じ専用キーを使用する。
+      try { localStorage.setItem('flare-songs:theme:v1', theme); } catch (_) {}
+      updateDarkmodeLabel();
     });
   }
+}
+
+function updateDarkmodeLabel() {
+  const nextMode = document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'lightmode' : 'darkmode';
+  document.getElementById('dark-mode-btn').textContent = i18n[currentLang][nextMode];
 }
 
 function updateUILabels() {
@@ -178,7 +186,7 @@ function updateUILabels() {
   document.getElementById("mode-select").options[1].textContent = t.mode_song;
   document.getElementById("lang-label").textContent = t.language;
 
-  document.getElementById("dark-mode-btn").innerText = t.darkmode;
+  updateDarkmodeLabel();
   // お気に入りボタンの表示内容とクラスの統一（ここを追加）
   const favBtn = document.getElementById("fav-only-btn");
   favBtn.textContent = favOnlyMode ? t.fav_toggle_on : t.fav_toggle_off;

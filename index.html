@@ -3,6 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- CSSより前にテーマを復元し、初期表示の色の切替を抑える。 -->
+  <script id="theme-init">
+    (() => {
+      let theme;
+      try { theme = localStorage.getItem('flare-songs:theme:v1'); } catch (_) {}
+      if (theme !== 'light' && theme !== 'dark') {
+        theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-bs-theme', theme);
+    })();
+  </script>
   <title>不知火フレア 歌枠＆MV 一覧サイト | Jump to Flare’s Live & MVs</title>
   <link rel="icon" href="favicon.ico" type="image/x-icon">
   <meta name="description" content="不知火フレアさんのYouTube歌枠やMVを頭出しリンク付きで一覧化。Jump to Flare’s Live & MVsで好みの楽曲へすぐアクセス！" />
@@ -39,7 +50,7 @@
 
     <!-- 言語切替 -->
     <div class="text-end mb-3 d-flex justify-content-end align-items-center gap-2">
-      <a id="dark-mode-btn" class="nav-link" href="#">ダークモード</a>
+      <button id="dark-mode-btn" type="button" class="nav-link">ダークモード</button>
       <span> | </span>
       <label for="lang-select" class="form-label small mb-0" id="lang-label">言語</label>
       <select id="lang-select" class="form-select form-select-sm w-auto d-inline">
