@@ -145,7 +145,7 @@ F08-U08～U10は旧実装との比較から、動画ID＋時刻、固定snapshot
 | BASE-B06 | 4分類の選択肢・抽選対象・変更時の結果消去と共通履歴・日英切替 | BASE-B06 | [browser.test.cjs](../tests/browser/browser.test.cjs) | 操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行 |
 | BASE-B07 | 抽選→閉じる→再抽選・結果内の再抽選・検索リセット・履歴表示からの閉じる | BASE-B07 | [browser.test.cjs](../tests/browser/browser.test.cjs) | 操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行 |
 | BASE-B08 | 新機能のボタンは選択言語のみ・PC／375pxのボタンサイズと両テーマ | BASE-B08 | [browser.test.cjs](../tests/browser/browser.test.cjs) | 操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行 |
-| BASE-B09 | 6画面幅と992pxの境界・日英×両テーマ×通常／長い文字列のレスポンシブ表示 | BASE-B09 | [browser.test.cjs](../tests/browser/browser.test.cjs) | 操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行 |
+| BASE-B09 | 6画面幅と992pxの境界・日英×両テーマ×通常／長い文字列のレスポンシブ表示 | BASE-B09 | [browser.test.cjs](../tests/browser/browser.test.cjs) | 入力・操作・境界検査を維持。1行固定を、折り返しを許容する縦横の収まり・非重複・操作領域検査へ置換。お気に入りの両ラベルと判定の故障注入も確認。[理由](responsive-checks.md) |
 | BASE-B10 | 高速な連続操作・直近10曲回避・再抽選時にフォーカスとスクロールを維持 | BASE-B10 | [browser.test.cjs](../tests/browser/browser.test.cjs) | 操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行 |
 | BASE-B11 | データ文字列のHTMLを実行しない・375pxの長い文字列・ライト／ダーク | BASE-B11 | [browser.test.cjs](../tests/browser/browser.test.cjs) | 操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行 |
 | BASE-B12 | 同一タブの再読込で抽選履歴を保持 | BASE-B12 | [browser.test.cjs](../tests/browser/browser.test.cjs) | 操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行 |

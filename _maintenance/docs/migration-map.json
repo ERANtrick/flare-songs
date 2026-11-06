@@ -1540,7 +1540,7 @@
       "BASE-B09"
     ],
     "file": "tests/browser/browser.test.cjs",
-    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+    "reason": "入力・操作・境界検査を維持。1行固定を、自然な折り返しを許容する縦横の収まり・非重複・操作領域検査へ置換。お気に入り両ラベルと判定の故障注入も確認。docs/responsive-checks.md参照"
   },
   {
     "id": "BASE-B10",

@@ -24,6 +24,7 @@ function check(name,fn){if(!idsByName[name])throw Error('Unmapped case: '+name);
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const {measureActions, assertActions, probeActionChecks} = require('../../helpers/action-layout.cjs');
 const validation=maintenance;
 
 const Papa = require('papaparse');
@@ -340,6 +341,10 @@ check('初期表示・検索と抽選の独立・抽選後の情報表示', asyn
         renderSurpriseResult();
       }, content);
       await p.locator('#surprise-thumbnail').evaluate(image => image.decode());
+      if (content === 'normal') {
+        const probes = await probeActionChecks(p);
+        fs.writeFileSync(path.join(artifact(), 'responsive-probes.json'), JSON.stringify(probes, null, 2));
+      }
       for (const width of widths) {
         await p.setViewportSize({width, height:1200});
         for (const theme of ['light', 'dark']) {
@@ -351,17 +356,6 @@ check('初期表示・検索と抽選の独立・抽選後の情報表示', asyn
               const area = document.querySelector('.surprise-area');
               const image = document.querySelector('.surprise-artwork').getBoundingClientRect();
               const info = document.querySelector('.surprise-details').getBoundingClientRect();
-              const buttons = [...document.querySelectorAll('#surprise-area .surprise-action')].filter(node => !node.hidden).map(node => {
-                const label = node.querySelector('[data-surprise-label]');
-                const range = document.createRange();
-                range.selectNodeContents(label);
-                const rect = node.getBoundingClientRect();
-                const textRects = [...range.getClientRects()];
-                return { id:node.id, height:rect.height, width:rect.width,
-                  lines:new Set(textRects.map(text => text.top.toFixed(2))).size,
-                  textInside:textRects.every(text => text.left >= rect.left && text.right <= rect.right),
-                  overflow:node.scrollWidth > node.clientWidth };
-              });
               const textOverflow = ['surprise-song-title', 'surprise-session'].some(id => {
                 const node = document.getElementById(id);
                 return node.scrollWidth > node.clientWidth;
@@ -373,7 +367,7 @@ check('初期表示・検索と抽選の独立・抽選後の情報表示', asyn
               return { stacked:info.top >= image.bottom, thumbnail:Math.round(image.width),
                 sideways:info.left >= image.right, areaOverflow:area.scrollWidth > area.clientWidth,
                 fitsViewport:areaRect.left >= -1 && areaRect.right <= innerWidth + 1,
-                pageOverflow:document.documentElement.scrollWidth > innerWidth, outsideSearch, textOverflow, buttons };
+                pageOverflow:document.documentElement.scrollWidth > innerWidth, outsideSearch, textOverflow };
             });
             assert.equal(layout.stacked, width < 992, JSON.stringify({width, lang, content, layout}));
             if (width < 992) assert.ok(layout.thumbnail <= 280);
@@ -383,22 +377,24 @@ check('初期表示・検索と抽選の独立・抽選後の情報表示', asyn
             // 極端な配信タイトルで既存検索selectが広がる問題は別の領域。今回変更しない。
             assert.deepEqual(layout.outsideSearch, [], '検索領域以外にはみ出しがある: ' + JSON.stringify(layout));
             assert.equal(layout.textOverflow, false);
-            for (const button of layout.buttons) {
-              assert.equal(button.lines, 1, JSON.stringify({width, lang, content, button}));
-              assert.equal(button.textInside, true, JSON.stringify({width, lang, content, button}));
-              assert.equal(button.overflow, false);
-              assert.ok(button.height >= (width < 992 ? 48 : 44));
-            }
-            // 登録／解除の長い方のラベルでも、一行で収まることを確認。
+            const beforeToggle = await measureActions(p);
+            assertActions(beforeToggle, width, {width, lang, theme, content, state:'before favorite toggle'});
+            // Both favorite labels must fit in both dimensions; wrapping is allowed.
             await p.click('#surprise-favorite');
-            const favoriteLines = await p.locator('[data-surprise-label="favorite"]').evaluate(label => {
-              const range = document.createRange(); range.selectNodeContents(label);
-              return new Set([...range.getClientRects()].map(rect => rect.top.toFixed(2))).size;
-            });
-            assert.equal(favoriteLines, 1);
+            const afterToggle = await measureActions(p);
+            assertActions(afterToggle, width, {width, lang, theme, content, state:'after favorite toggle'});
+            const favoriteBefore = beforeToggle.buttons.find(b => b.id === 'surprise-favorite');
+            const favoriteAfter = afterToggle.buttons.find(b => b.id === 'surprise-favorite');
+            assert.ok(['true','false'].includes(favoriteBefore.pressed));
+            assert.equal(favoriteAfter.pressed, favoriteBefore.pressed === 'true' ? 'false' : 'true');
+            assert.notEqual(favoriteAfter.text, favoriteBefore.text);
             await p.click('#surprise-favorite');
-            responsive.push({width, lang, theme, content, layout:layout.stacked ? 'vertical' : 'horizontal', thumbnail:layout.thumbnail, buttonLines:1, existingSearchOverflow:layout.pageOverflow});
-            if (![991, 992].includes(width) && (content === 'normal' || (lang === 'en' && theme === 'dark'))) {
+            const restored = await measureActions(p);
+            assertActions(restored, width, {width, lang, theme, content, state:'favorite restored'});
+            assert.equal(restored.buttons.find(b => b.id === 'surprise-favorite').pressed, favoriteBefore.pressed);
+            responsive.push({width, lang, theme, content, layout:layout.stacked ? 'vertical' : 'horizontal', thumbnail:layout.thumbnail,
+              existingSearchOverflow:layout.pageOverflow, beforeToggle, afterToggle, restored});
+            if ([375,991,992,1280].includes(width) || (content === 'normal' || (lang === 'en' && theme === 'dark'))) {
               await p.locator('#surprise-area').screenshot({path:path.join(output, 'responsive-' + width + '-' + lang + '-' + theme + '-' + content + '.png')});
             }
           }
@@ -421,7 +417,8 @@ check('初期表示・検索と抽選の独立・抽選後の情報表示', asyn
       }
     }
     fs.writeFileSync(path.join(artifact(), 'responsive-results.json'), JSON.stringify(responsive, null, 2));
-    console.log('Responsive matrix:', responsive.length + ' combinations passed');
+    console.log('Responsive matrix:', responsive.length + ' combinations passed; favorite toggle states:', responsive.length * 3);
+    console.log('Responsive multiline labels:', responsive.flatMap(r => r.beforeToggle.buttons).filter(b => b.lines > 1).length);
     await sample.context.close();
   });
   check('高速な連続操作・直近10曲回避・再抽選時にフォーカスとスクロールを維持', async () => {

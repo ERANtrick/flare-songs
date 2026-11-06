@@ -46,6 +46,9 @@ jobs:
             _maintenance/artifacts/*/playwright.xml
             _maintenance/artifacts/*/pages/*-build.json
             _maintenance/artifacts/*/pages/comparison.json
+            _maintenance/artifacts/*/responsive-results.json
+            _maintenance/artifacts/*/responsive-probes.json
+            _maintenance/artifacts/*/responsive-992-ja-*-normal.png
           if-no-files-found: warn
           retention-days: 7
       - name: Upload current failure evidence
