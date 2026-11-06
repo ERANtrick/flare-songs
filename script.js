@@ -39,6 +39,8 @@ const i18n = {
     surprise_remove: 'お気に入りを解除',
     surprise_history: 'この曲の歌唱履歴を見る（全{count}件）',
     surprise_loading: '曲データを読み込み中です…',
+    surprise_image_loading: '画像を読み込み中…',
+    surprise_image_error: '画像を表示できません',
     surprise_empty: 'このカテゴリには再生できる曲がありません。別のカテゴリを選んでください。',
     surprise_error: '曲データを読み込めませんでした。ページを再読み込みしてください。',
     load_timeout: '曲データの読み込みに時間がかかりすぎました。再読み込みをお試しください。',
@@ -83,6 +85,8 @@ const i18n = {
     surprise_remove: 'Remove from favorites',
     surprise_history: 'See all performances ({count})',
     surprise_loading: 'Loading songs…',
+    surprise_image_loading: 'Loading image…',
+    surprise_image_error: 'Image unavailable',
     surprise_empty: 'No playable songs in this category. Please choose another category.',
     surprise_error: 'Songs could not be loaded. Please reload this page.',
     load_timeout: 'Loading songs took too long. Please try reloading.',
@@ -933,12 +937,99 @@ function getPublicHistory(title) {
   return allSongs.filter(song => song['公開'] === '公開' && song['曲名'] === title);
 }
 
+const SURPRISE_THUMBNAIL_MARK_DELAY = 150;
+const surpriseThumbnailState = { revision: 0, url: '', key: '', phase: 'idle', stop: () => {} };
+
+function updateSurpriseThumbnail(song) {
+  const image = document.getElementById('surprise-thumbnail');
+  const frame = image.parentElement;
+  const status = document.getElementById('surprise-thumbnail-status');
+  const spinner = status.querySelector('.spinner-border');
+  const message = status.querySelector('[data-thumbnail-message]');
+  const state = surpriseThumbnailState;
+  const url = song ? safeWebURL(song['ThumbnailURL']) : '';
+  const key = song ? song['リンク'] + '\n' + song['曲名'] : '';
+  const updateMessage = () => {
+    message.textContent = i18n[currentLang][state.phase === 'error' ? 'surprise_image_error' : 'surprise_image_loading'];
+  };
+  const paint = phase => {
+    state.phase = phase;
+    frame.dataset.thumbnailState = phase;
+    frame.setAttribute('aria-busy', String(phase === 'loading'));
+    image.setAttribute('aria-hidden', String(phase !== 'ready'));
+    spinner.hidden = phase !== 'loading';
+    updateMessage();
+    if (phase !== 'loading') status.hidden = phase !== 'error';
+  };
+  if (!url) {
+    state.stop();
+    state.revision++;
+    state.url = ''; state.key = '';
+    paint('idle');
+    frame.hidden = true;
+    status.hidden = true;
+    if (song) image.removeAttribute('src');
+    return;
+  }
+  frame.hidden = false;
+  image.alt = song['曲名'];
+  // 同じ画像の再描画（言語変更を含む）では読み込みや表示待ちを開始し直さない。
+  if (state.url === url && (state.phase === 'loading' || state.phase === 'ready' ||
+      (state.phase === 'error' && state.key === key))) {
+    state.key = key;
+    updateMessage();
+    return;
+  }
+  state.stop();
+  const revision = ++state.revision;
+  state.url = url; state.key = key;
+  if (image.currentSrc === url && image.complete && image.naturalWidth > 0) {
+    paint('ready');
+    return;
+  }
+  status.hidden = true;
+  paint('loading');
+  let markTimer;
+  const valid = () => state.revision === revision && state.phase === 'loading' &&
+    !!currentSurprise && safeWebURL(currentSurprise['ThumbnailURL']) === url;
+  const cleanup = () => {
+    clearTimeout(markTimer);
+    image.removeEventListener('load', loaded);
+    image.removeEventListener('error', failed);
+  };
+  const finish = phase => {
+    if (!valid()) return;
+    cleanup();
+    paint(phase);
+  };
+  const loaded = () => {
+    if (!valid() || !image.complete || !image.naturalWidth || image.currentSrc !== url) return;
+    const decoded = typeof image.decode === 'function' ? image.decode() : Promise.resolve();
+    decoded.then(() => {
+      if (valid() && image.currentSrc === url) finish('ready');
+    }, () => { if (valid()) finish('error'); });
+  };
+  const failed = () => {
+    if (valid() && image.complete && image.naturalWidth === 0) finish('error');
+  };
+  state.stop = cleanup;
+  image.addEventListener('load', loaded);
+  image.addEventListener('error', failed);
+  markTimer = setTimeout(() => { if (valid()) status.hidden = false; }, SURPRISE_THUMBNAIL_MARK_DELAY);
+  // 時間だけで失敗にしない。遅れて完了する正常画像もload/errorで確定する。
+  if (image.getAttribute('src') !== url || (image.complete && image.naturalWidth === 0)) image.src = url;
+  if (image.complete) Promise.resolve().then(() => image.naturalWidth ? loaded() : failed());
+}
+
 function renderSurpriseResult() {
   const result = document.getElementById('surprise-result');
   result.hidden = !currentSurprise;
   document.getElementById('surprise-pick').setAttribute('aria-expanded', String(!!currentSurprise));
   updateSurpriseLabels();
-  if (!currentSurprise) return;
+  if (!currentSurprise) {
+    updateSurpriseThumbnail(null);
+    return;
+  }
   const song = currentSurprise;
   document.getElementById('surprise-song-title').textContent = song['曲名'];
   const details = {
@@ -951,13 +1042,7 @@ function renderSurpriseResult() {
     node.textContent = value || '';
     node.hidden = !value;
   }
-  const image = document.getElementById('surprise-thumbnail');
-  const imageURL = safeWebURL(song['ThumbnailURL']);
-  image.parentElement.hidden = !imageURL;
-  if (imageURL) {
-    image.src = imageURL;
-    image.alt = song['曲名'];
-  } else image.removeAttribute('src');
+  updateSurpriseThumbnail(song);
   document.getElementById('surprise-play').href = safeWebURL(song['リンク']);
   document.getElementById('surprise-history').hidden = getPublicHistory(song['曲名']).length < 2;
   syncSurpriseFavoriteButton();
@@ -1004,9 +1089,6 @@ function initSurprise() {
   document.getElementById('surprise-history').addEventListener('click', showSurpriseHistory);
   document.getElementById('surprise-play').addEventListener('click', () => {
     if (currentSurprise) trackSongEvent('click_play', currentSurprise, currentSurprise['リンク'], 'Song');
-  });
-  document.getElementById('surprise-thumbnail').addEventListener('error', event => {
-    event.target.parentElement.hidden = true;
   });
 }
 

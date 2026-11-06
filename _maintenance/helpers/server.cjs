@@ -3,9 +3,11 @@ const fs = require('node:fs');
 const path = require('node:path');
 const {site} = require('./paths.cjs');
 const mime = {'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.map':'application/json','.txt':'text/plain; charset=utf-8','.svg':'image/svg+xml','.ico':'image/x-icon'};
-async function startServer(root = site) {
+async function startServer(root = site, respond = () => false) {
   const server = http.createServer((req, res) => {
     if (!['GET', 'HEAD'].includes(req.method)) {res.writeHead(405).end(); return;}
+    // Optional explicit fixture endpoints; normal suites still serve the checkout unchanged.
+    if (respond(req, res)) return;
     let file;
     try {
       let url = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);

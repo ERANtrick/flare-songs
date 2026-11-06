@@ -226,8 +226,15 @@ a:hover {
 .surprise-result { display: grid; grid-template-columns: minmax(0, 260px) minmax(0, 1fr); gap: 1.25rem; border-top: 1px solid var(--bs-border-color); margin-top: 1rem; padding-top: 1rem; overflow-anchor: none; }
 .surprise-result[hidden], .surprise-area [hidden] { display: none !important; }
 .surprise-result:has(.surprise-artwork[hidden]) { grid-template-columns: minmax(0, 1fr); }
-.surprise-artwork { align-self: start; }
-.surprise-artwork img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 0.5rem; }
+.surprise-artwork { align-self: start; position: relative; aspect-ratio: 16 / 9; border-radius: 0.5rem; overflow: hidden; background: var(--bs-tertiary-bg); }
+.surprise-artwork img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 0.5rem; }
+.surprise-artwork[data-thumbnail-state="loading"] img,
+.surprise-artwork[data-thumbnail-state="error"] img { opacity: 0; }
+.surprise-thumbnail-status { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 0.4rem; padding: 0.5rem; color: var(--bs-secondary-color); font-size: 0.75rem; }
+.surprise-thumbnail-status .spinner-border { width: 0.8rem; height: 0.8rem; border-width: 0.1rem; }
+@media (prefers-reduced-motion: reduce) {
+  .surprise-thumbnail-status .spinner-border { animation: none; }
+}
 .surprise-details { min-width: 0; }
 #surprise-song-title { font-size: clamp(1.4rem, 3vw, 1.8rem); font-weight: 700; overflow-wrap: anywhere; margin-bottom: 0.6rem; }
 .surprise-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem; }
