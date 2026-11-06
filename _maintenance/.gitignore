@@ -1,0 +1,6 @@
+node_modules/
+artifacts/
+test-results/
+playwright-report/
+.bundle/
+vendor/

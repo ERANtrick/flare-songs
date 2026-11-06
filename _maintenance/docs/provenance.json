@@ -1,0 +1,26 @@
+{
+  "baseCommit": "e7f8e5026802f648250014fc63103f2dcc8911dc",
+  "source": "F06 final validation kit; existing source files are external archives, not runtime dependencies.",
+  "originalCases": {
+    "unit": 70,
+    "browser": 104
+  },
+  "originalSourceSHA256": {
+    "kit/tests/browser.test.cjs": "bcfc36a7c2852eb6e8128b19d1637df2507453437918206be04f66d1a4e0bc4b",
+    "kit/tests/csv-loading.test.cjs": "dac38f39b1d7ec28dbee8441344419be529604acf9f91d1669f685429cfce3a5",
+    "kit/tests/csv-validation.test.cjs": "2581dc6e1db84409c8ee16ed01aef94eb5e3ce722ef98ac2c6619c9cab89edd9",
+    "kit/tests/f05-scope.cjs": "f3f19cf4fd8ded64ae6d4ef9007f98ec2cf98cc7b9a7d46fcd623a8d0f632f46",
+    "kit/tests/f06-scope.cjs": "9747263efef93fa2880edec895f03bb2845a499e5ac46cd687e685cbb68b3ab5",
+    "kit/tests/progressive-rendering.test.cjs": "6dcf28cc38138ad1f0be1b827deecdc542a0987a3330d4023bac41ad7e25604e",
+    "kit/tests/random-song.test.cjs": "bc332ae7ae8315139721a3c2e0c8d51eae5bd1378080f1819398aa5141fc04ef",
+    "kit/tests/session-order-browser.test.cjs": "50bedb0d111ee1985e9a80bfac272725750aceb9e19cd93b167280c1605178c2",
+    "kit/tests/session-order-reference.cjs": "1e95331127ea832db59516f92de37b4f474fc02a5be66e07cb62263a92f6983d",
+    "kit/tests/session-order.test.cjs": "f7516cf77835e8e0bfecef3fce1718a2279d71826b7e963ef4cd1065bff0d9c3",
+    "kit/tests/song-group-random-browser.test.cjs": "5049a756e945c5f6feaf5f04fecf40ead290b786b96a7859df91b06c9dc9e176",
+    "kit/tests/song-group-random.test.cjs": "c8f21b1d9f220174de337cb5f736b53515695c223295be6af663550cd7f7a022",
+    "kit/tests/theme-browser.test.cjs": "08b8e307bab2390f14d41977da110ff4156d920da274705595289c8df3c9214e",
+    "kit/tests/theme.test.cjs": "83ff393ca58b59ed99a37f46125928b6cd5d866e9016282867f02f77de9ec6cb",
+    "kit/tests/ui-feedback-browser.test.cjs": "34b5330168afc2e369a24a24fd51948739fd219d03d58d2dbd2706e3e9e517f5",
+    "kit/tests/ui-feedback.test.cjs": "b76cf579a589f201c200e422c8e6782b64e995b7ff3b81c2b5023e9a51619b56"
+  }
+}
