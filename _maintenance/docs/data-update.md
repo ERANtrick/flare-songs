@@ -17,12 +17,12 @@
 
 ## live
 
-レスポンス本文を`artifacts/<今回run>/live-<width>.csv`へ保存し、その同じ本文を独立にPapaParseで数え、UI／診断と照合します。固定件数を持ち込みません。実際のGoogleリダイレクト、CDN、画像も確認します。取得失敗時に保存CSVへfallbackしません。2画面幅の間でデータが更新された場合も幅ごとのhashと件数を記録し、同一データだったと断定しません。
+レスポンス本文を`artifacts/<今回run>/live-<width>.csv`へ保存し、その同じ本文を独立にPapaParseで数え、UI／診断と照合します。固定件数を持ち込みません。実際のGoogleリダイレクト、画像、同一originのvendorの200／hashも確認します。取得失敗時に保存CSVへfallbackしません。2画面幅の間でデータが更新された場合も幅ごとのhashと件数を記録し、同一データだったと断定しません。
 
 失敗時は`live-<width>-failure.json`、Playwrightレポート、traceを確認し、通信・データ・サイト実装のどこで失敗したか区別します。liveの失敗を通常の固定回帰の失敗／成功へ混ぜません。
 
 ## 依存
 
-ライブラリ更新はテスト移行や機能変更と分けます。package.jsonの正確な版とlockを同時に更新し、CDN完全URL・ローカル配布物の対応も確認します。`npm ci`で再現し、固定回帰とliveを実施してください。
+ライブラリ更新はテスト移行や機能変更と分けます。package.jsonの正確な版とlockを同時に更新し、公開vendor・完全なLICENSE・必要なmapを未改変の正規配布物へそろえ、vendor-manifest.jsonの出所／byte数／hashと公開ファイル一覧もレビューします（[詳細](vendor-assets.md)）。`npm ci`で再現し、固定回帰とliveを実施してください。
 
 GitHub Pages依存の更新はGemfile／lock、生成物比較、公式[Pages依存一覧](https://pages.github.com/versions/)を確認します。Jekyll 3の既定excludeが維持されること、プラグインやMarkdown由来の公開物が変わらないことを検証します。

@@ -76,10 +76,7 @@ async function sample({scheme = 'light', saved, fault, width = 1280, touch = fal
       if (hold && u.pathname === '/script.js') await gate;
       return route.continue();
     }
-    if (u.hostname === 'cdn.jsdelivr.net') {
-      const f = u.pathname.split('/').pop();
-      return route.fulfill({path: localAsset(f), contentType: f.endsWith('.css') ? 'text/css' : 'text/javascript'});
-    }
+
     if (u.hostname === 'docs.google.com') {
       if (failCSV) return route.abort('failed');
       return route.fulfill({body: csv, contentType: 'text/csv; charset=utf-8', headers: {'access-control-allow-origin': '*'}});

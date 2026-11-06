@@ -3,19 +3,20 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('n
 const Papa=require('papaparse');
 const {startServer}=require('../../helpers/server.cjs');
 const {artifact}=require('../../helpers/paths.cjs');
-const {csvURL,cdn}=require('../../helpers/browser.cjs');
+const {csvURL}=require('../../helpers/browser.cjs');
+const {runtimeAssets,verifyAsset}=require('../../helpers/vendor.cjs');
 const {settle}=require('../../helpers/view.cjs');
 let server;
 test.beforeAll(async({browser})=>{server=await startServer();fs.writeFileSync(path.join(artifact(),'browser-version.txt'),browser.version()+'\n');});
 test.afterAll(async()=>{if(server)await server.close();});
-for(const width of [1280,375])test(`LIVE-${width} 公開CSV・CDN・画像を実通信で確認`,async({browser},info)=>{
+for(const width of [1280,375])test(`LIVE-${width} 公開CSV・同一originライブラリ・画像を実通信で確認`,async({browser},info)=>{
  const context=await browser.newContext({viewport:{width,height:1000}});
- const runtimeErrors=[],responses=[];
+ const runtimeErrors=[],responses=[],vendorResponses=[];
  context.on('page',p=>p.on('pageerror',error=>runtimeErrors.push(error.message)));
  // Analytics is intentionally suppressed. All functional resources use real network.
  await context.route(/https:\/\/(?:www\.)?(?:googletagmanager|google-analytics)\.com\//,route=>route.abort());
  const page=await context.newPage();page.setDefaultTimeout(30000);page.setDefaultNavigationTimeout(45000);
- page.on('response',r=>responses.push({url:r.url(),status:r.status()}));
+ page.on('response',r=>{responses.push({url:r.url(),status:r.status()});if(runtimeAssets.some(e=>r.url()===server.origin+'/flare-songs/'+e.path))vendorResponses.push(r);});
  page.on('requestfailed',r=>responses.push({url:r.url(),failure:r.failure()?.errorText}));
  try{
   const [response]=await Promise.all([page.waitForResponse(r=>{
@@ -29,7 +30,8 @@ for(const width of [1280,375])test(`LIVE-${width} 公開CSV・CDN・画像を実
   await settle(page);const diagnostics=await page.evaluate(()=>flareSongsDiagnostics());
   assert.equal(diagnostics.acceptedPublicRows,publicRows.length);assert.equal(diagnostics.excludedRows,0);
   assert.equal(await page.locator('#song-list .card').count(),Math.min(publicRows.length,20));
-  for(const url of cdn.keys())assert(responses.some(r=>r.url===url&&r.status===200),'CDN response: '+url);
+  for(const entry of runtimeAssets){const response=vendorResponses.find(r=>r.url()===server.origin+'/flare-songs/'+entry.path);assert(response,'Missing local vendor: '+entry.path);verifyAsset(entry,response.status(),await response.body());}
+  assert.equal(responses.some(r=>new URL(r.url).hostname==='cdn.jsdelivr.net'),false);
   if(publicRows.length){await expect.poll(()=>page.locator('#song-list img').evaluateAll(ns=>ns.some(n=>n.complete&&n.naturalWidth>0))).toBe(true);}
   await page.click('#surprise-pick');if(publicRows.length)await expect(page.locator('#surprise-result')).toBeVisible();
   await page.selectOption('#mode-select','song');await settle(page);assert.equal(await page.locator('#song-list .accordion-item').count(),titles.size);

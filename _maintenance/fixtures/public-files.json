@@ -7,5 +7,15 @@
   "licenses/README.md",
   "licenses/bootstrap-icons-LICENSE.txt",
   "script.js",
-  "styles.css"
+  "styles.css",
+  "assets/vendor/bootstrap-5.3.2/bootstrap.min.css",
+  "assets/vendor/bootstrap-5.3.2/bootstrap.bundle.min.js",
+  "assets/vendor/papaparse-5.3.2/papaparse.min.js",
+  "assets/vendor/bootstrap-5.3.2/bootstrap.min.css.map",
+  "assets/vendor/bootstrap-5.3.2/bootstrap.bundle.min.js.map",
+  "licenses/bootstrap-5.3.2-LICENSE.txt",
+  "licenses/papaparse-5.3.2-LICENSE.txt",
+  "licenses/popper-2.11.8-LICENSE.txt",
+  "licenses/rfs-10.0.0-LICENSE.txt",
+  "licenses/normalize-LICENSE.txt"
 ]

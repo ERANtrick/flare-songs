@@ -46,7 +46,7 @@ async function sample(data=csv,{width=1280,noObserver=false}={}){
       if(url.pathname==='/script.js')return route.fulfill({body:fs.readFileSync(path.join(site,'script.js'),'utf8')+instrumentation,contentType:'text/javascript'});
       return route.continue();
     }
-    if(url.hostname==='cdn.jsdelivr.net'){const file=url.pathname.split('/').pop();return route.fulfill({path:localAsset(file),contentType:file.endsWith('.css')?'text/css':'text/javascript'});}
+
     if(url.hostname==='docs.google.com')return route.fulfill({body:data,contentType:'text/csv; charset=utf-8',headers:{'access-control-allow-origin':'*'}});
     if(url.hostname==='img.youtube.com')return route.fulfill({body:pixel,contentType:'image/png'});
     return route.abort();
