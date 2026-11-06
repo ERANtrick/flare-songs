@@ -1,0 +1,11 @@
+# Preserve Jekyll 3 defaults: setting exclude replaces the default array.
+# GitHub Pages continues to build main:/ using Jekyll (no custom deployment).
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+  - _maintenance/

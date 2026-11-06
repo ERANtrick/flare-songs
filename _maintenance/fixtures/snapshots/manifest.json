@@ -1,0 +1,29 @@
+{
+  "source": "Public CSV snapshots retained byte-for-byte from the F06 validation kit; never overwritten by live checks.",
+  "files": [
+    {
+      "name": "songs.csv",
+      "bytes": 903783,
+      "sha256": "81004e1ed88ccb5134486a072baf47ad4c196e7eb1a7adcd7ddc5e7320904e09",
+      "expected": {
+        "records": 2763,
+        "public": 2733,
+        "titles": 681,
+        "sessions": 205,
+        "warnings": 0
+      }
+    },
+    {
+      "name": "known-csv-f02.csv",
+      "bytes": 903782,
+      "sha256": "84a41295ac56ef5f580730e1c564eceb00c3442e439780cc2c5ffaa2ac0bb2e3",
+      "expected": {
+        "records": 2763,
+        "public": 2733,
+        "titles": 681,
+        "sessions": 205,
+        "warnings": 1
+      }
+    }
+  ]
+}

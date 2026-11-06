@@ -1,0 +1,1963 @@
+[
+  {
+    "id": "RS-U01",
+    "title": "カテゴリ4択・将来カテゴリ・公開状態・曲名・再生リンクの条件",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "RS-U01"
+    ],
+    "file": "tests/unit/random-song.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "RS-U02",
+    "title": "YouTube URLの基本検証と不正スキーム・偽装ホストの除外",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "RS-U02"
+    ],
+    "file": "tests/unit/random-song.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "RS-U03",
+    "title": "完全一致でグループ化し、表記ゆれ・空白・大小文字を統合しない",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "RS-U03"
+    ],
+    "file": "tests/unit/random-song.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "RS-U04",
+    "title": "歌唱回数1対9でも曲名単位で均等、曲内の歌唱履歴も均等（100,000回）",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "RS-U04"
+    ],
+    "file": "tests/unit/random-song.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "RS-U05",
+    "title": "直近10曲を除外し、少数候補では最古から制限解除、直前の重複を回避",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "RS-U05"
+    ],
+    "file": "tests/unit/random-song.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "RS-U06",
+    "title": "カテゴリを跨ぐ履歴・10件上限・同一セッションでの再読込",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "RS-U06"
+    ],
+    "file": "tests/unit/random-song.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "RS-U07",
+    "title": "保存制限・容量不足・壊れたJSONでも抽選と既存形式のお気に入りを維持",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "RS-U07"
+    ],
+    "file": "tests/unit/random-song.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "CSV-U01",
+    "title": "現行公開CSV：全記録を変更せず受理し、13列・公開2,733件を維持",
+    "data": "D",
+    "note": "保存CSVを固定し、liveの件数増減で更新しない",
+    "destination": [
+      "CSV-U01"
+    ],
+    "file": "tests/unit/csv-validation.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "CSV-U02",
+    "title": "9必須ヘッダーを個別に欠落させると構造エラー。任意4列の欠落は許容",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-U02"
+    ],
+    "file": "tests/unit/csv-validation.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "CSV-U03",
+    "title": "5.3.2のmeta.fieldsから重複ヘッダーを検出（空見出し・前後空白も含む）",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-U03"
+    ],
+    "file": "tests/unit/csv-validation.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "CSV-U04",
+    "title": "閉じていない引用符・不正な引用符は全体エラー、正常な引用符内の改行は許容",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-U04"
+    ],
+    "file": "tests/unit/csv-validation.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "CSV-U05",
+    "title": "列数の不足・超過は該当行のみ除外し、レコード番号と正常行の順序を維持",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-U05"
+    ],
+    "file": "tests/unit/csv-validation.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "CSV-U06",
+    "title": "末尾空行は不正行に含めない",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-U06"
+    ],
+    "file": "tests/unit/csv-validation.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "CSV-U07",
+    "title": "引用符異常と列数異常で5.3.2のrow基準が違っても診断番号をそろえる",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-U07"
+    ],
+    "file": "tests/unit/csv-validation.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "CSV-U08",
+    "title": "公開行の6必須値の欠損・空白は当該行のみ除外",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-U08"
+    ],
+    "file": "tests/unit/csv-validation.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "CSV-U09",
+    "title": "存在しない日付と形式不正を除外し、閏日・既存の年月日表記は保持",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-U09"
+    ],
+    "file": "tests/unit/csv-validation.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "CSV-U10",
+    "title": "公開行のYouTube URLを検査し、偽装ホスト・不正スキーム・不正IDを行単位で除外",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-U10"
+    ],
+    "file": "tests/unit/csv-validation.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "CSV-U11",
+    "title": "単独MV・カバー動画の頭出し秒数は必須にしない",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-U11"
+    ],
+    "file": "tests/unit/csv-validation.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "CSV-U12",
+    "title": "未知カテゴリ・画像欠落・重複頭出しは警告のみ、値・記録・順序は変えない",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-U12"
+    ],
+    "file": "tests/unit/csv-validation.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "CSV-U13",
+    "title": "不正な画像URL・時刻は警告のみ、公開列の未知値は公開へ自動変換しない",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-U13"
+    ],
+    "file": "tests/unit/csv-validation.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "CSV-U14",
+    "title": "metaの中断・切詰め・結果構造欠損は全体エラー",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-U14"
+    ],
+    "file": "tests/unit/csv-validation.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "CSV-U15",
+    "title": "F05の許可差分以外は抽選方式・お気に入り・曲名遅延生成の既存関数を変更していない",
+    "data": "P",
+    "note": "ソース文字列一致依存。挙動契約へ統合・置換し旧IDを対応付ける",
+    "destination": [
+      "RS-U04",
+      "RS-U07",
+      "F05-B13",
+      "LAZY-B02",
+      "LAZY-B03",
+      "LAZY-B05"
+    ],
+    "file": "tests/unit/csv-validation.test.cjs",
+    "reason": "ソース一致を廃止し、列挙した動作・保存・描画契約へ統合"
+  },
+  {
+    "id": "CSV-U16",
+    "title": "F/Gの動画ID不一致は該当行・両IDを警告し、記録とURLを維持",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-U16"
+    ],
+    "file": "tests/unit/csv-validation.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "CSV-U17",
+    "title": "F/Gの表記や共有パラメータが異なっても同じ動画IDなら不一致にしない",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-U17"
+    ],
+    "file": "tests/unit/csv-validation.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "CSV-U18",
+    "title": "公開対象が元から0件なら、ヘッダーだけ・非公開行ありともエラーにしない",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-U18"
+    ],
+    "file": "tests/unit/csv-validation.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "CSV-U19",
+    "title": "全公開行が除外された場合は非公開の正常行が残っていても全体エラー",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-U19"
+    ],
+    "file": "tests/unit/csv-validation.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "CSV-U20",
+    "title": "公開行の一部だけが除外された場合は成功を維持",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-U20"
+    ],
+    "file": "tests/unit/csv-validation.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "CSV-U21",
+    "title": "空・空白のクエリ名は警告のみ、通常URLと一般的な共有パラメータは許容",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-U21"
+    ],
+    "file": "tests/unit/csv-validation.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "CSV-U22",
+    "title": "F02保存CSVの既知「絶対零度」?=0だけを警告し、2,763件を受理",
+    "data": "H",
+    "note": "既知「絶対零度」?=0の1警告・行番号を保持",
+    "destination": [
+      "CSV-U22"
+    ],
+    "file": "tests/unit/csv-validation.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "CSV-U23",
+    "title": "CSV検証・状態管理はテーマ改善の起点mainから変更していない",
+    "data": "P",
+    "note": "ソース文字列一致依存。挙動契約へ統合・置換し旧IDを対応付ける",
+    "destination": [
+      "CSV-U01",
+      "CSV-U02",
+      "CSV-U03",
+      "CSV-B10",
+      "CSV-B11",
+      "CSV-B12"
+    ],
+    "file": "tests/unit/csv-validation.test.cjs",
+    "reason": "ソース一致を廃止し、列挙した動作・保存・描画契約へ統合"
+  },
+  {
+    "id": "F08-U01",
+    "title": "t/start/#tの数値・複合時刻・指定なしを秒数へ解析",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F08-U01"
+    ],
+    "file": "tests/unit/session-order.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "F08-U02",
+    "title": "既存のt > start > #tの優先順と不正値の解釈を維持",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F08-U02"
+    ],
+    "file": "tests/unit/session-order.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "F08-U03",
+    "title": "逆順データを時刻の昇順へ、曲名や架空の開始秒数列は基準にしない",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F08-U03"
+    ],
+    "file": "tests/unit/session-order.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "F08-U04",
+    "title": "同じ時刻は異なるURL表記でもCSV順、時刻なしは0秒",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F08-U04"
+    ],
+    "file": "tests/unit/session-order.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "F08-U05",
+    "title": "不正時刻を1件でも含む配信は配信内の全件を元順に保つ",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F08-U05"
+    ],
+    "file": "tests/unit/session-order.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "F08-U06",
+    "title": "空名パラメータや不正URLも保守的に配信単位でCSV順へフォールバック",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F08-U06"
+    ],
+    "file": "tests/unit/session-order.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "F08-U07",
+    "title": "空配列・1件・正常な共有パラメータ付きMVでも動作し、元配列を変更しない",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F08-U07"
+    ],
+    "file": "tests/unit/session-order.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "F08-U08",
+    "title": "getPlaybackPointの結果を起点mainと比較（各表記・不正値・時刻優先順）",
+    "data": "P",
+    "note": "旧実装との比較を、仕様に基づく明示期待値へ置換",
+    "destination": [
+      "F08-U08"
+    ],
+    "file": "tests/unit/session-order.test.cjs",
+    "reason": "過去実装を参照せず仕様上の明示期待値へ置換"
+  },
+  {
+    "id": "F08-U09",
+    "title": "実CSV全2,763件・過去保存CSVのF01診断結果を完全に維持",
+    "data": "D＋H＋P",
+    "note": "旧実装との比較を、仕様に基づく明示期待値へ置換。保存CSVを固定し、liveの件数増減で更新しない。既知「絶対零度」?=0の1警告・行番号を保持",
+    "destination": [
+      "F08-U09"
+    ],
+    "file": "tests/unit/session-order.test.cjs",
+    "reason": "過去実装を参照せず仕様上の明示期待値へ置換"
+  },
+  {
+    "id": "F08-U10",
+    "title": "不正時刻・時刻重複・空名などの診断コード／行番号は共通化前と同一",
+    "data": "D＋P",
+    "note": "旧実装との比較を、仕様に基づく明示期待値へ置換。保存CSVを固定し、liveの件数増減で更新しない",
+    "destination": [
+      "F08-U10"
+    ],
+    "file": "tests/unit/session-order.test.cjs",
+    "reason": "過去実装を参照せず仕様上の明示期待値へ置換"
+  },
+  {
+    "id": "F08-U11",
+    "title": "F05の許可差分以外は配信内の時刻順・段階表示・CSV診断のコードを変更していない",
+    "data": "P",
+    "note": "ソース文字列一致依存。挙動契約へ統合・置換し旧IDを対応付ける",
+    "destination": [
+      "F08-U03",
+      "F08-U05",
+      "F08-B08",
+      "LAZY-B01",
+      "LAZY-B02",
+      "CSV-U01",
+      "CSV-B10"
+    ],
+    "file": "tests/unit/session-order.test.cjs",
+    "reason": "ソース一致を廃止し、列挙した動作・保存・描画契約へ統合"
+  },
+  {
+    "id": "THEME-U01",
+    "title": "保存なしは端末のライト／ダークを初期採用し、自動では保存しない",
+    "data": "S",
+    "note": "非同期の完了条件・操作順を保持し、単純な待ち時間延長で隠さない",
+    "destination": [
+      "THEME-U01"
+    ],
+    "file": "tests/unit/theme.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "THEME-U02",
+    "title": "保存済みlight/darkは反対の端末設定より優先",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "THEME-U02"
+    ],
+    "file": "tests/unit/theme.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "THEME-U03",
+    "title": "不正な保存値は未設定として扱い、元の値を勝手に書き換えない",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "THEME-U03"
+    ],
+    "file": "tests/unit/theme.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "THEME-U04",
+    "title": "クリック直後の表示・保存と日英文言は切替先を示す",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "THEME-U04"
+    ],
+    "file": "tests/unit/theme.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "THEME-U05",
+    "title": "localStorageの読取・保存・アクセス自体が失敗しても表示と切替を継続",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "THEME-U05"
+    ],
+    "file": "tests/unit/theme.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "THEME-U06",
+    "title": "専用キーだけを保存し、お気に入りと抽選履歴を保持",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "THEME-U06"
+    ],
+    "file": "tests/unit/theme.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "THEME-U07",
+    "title": "早期処理はCSS・外部スクリプトより前、ネイティブbuttonに不要な状態属性なし",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "THEME-U07"
+    ],
+    "file": "tests/unit/theme.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "THEME-U08",
+    "title": "F05の許可差分を除きテーマ改善時のJavaScript・HTML・CSSを維持",
+    "data": "P",
+    "note": "ソース文字列一致依存。挙動契約へ統合・置換し旧IDを対応付ける",
+    "destination": [
+      "THEME-U01",
+      "THEME-U04",
+      "THEME-U06",
+      "THEME-U07",
+      "THEME-B08",
+      "THEME-B10",
+      "CSV-B10",
+      "BASE-B03"
+    ],
+    "file": "tests/unit/theme.test.cjs",
+    "reason": "ソース一致を廃止し、列挙した動作・保存・描画契約へ統合"
+  },
+  {
+    "id": "F05-U01",
+    "title": "固定乱数0でFisher-Yatesの期待順と乱数呼出し回数を検証",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F05-U01"
+    ],
+    "file": "tests/unit/song-group-random.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "F05-U02",
+    "title": "結果が元と同じ順になる正常な乱数も受理し、重複・欠落なし",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F05-U02"
+    ],
+    "file": "tests/unit/song-group-random.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "F05-U03",
+    "title": "曲名の重複を1グループとし非公開を除き、元データを変更しない",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F05-U03"
+    ],
+    "file": "tests/unit/song-group-random.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "F05-U04",
+    "title": "繰り返し取得でも同じMapを返し、再シャッフルしない",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F05-U04"
+    ],
+    "file": "tests/unit/song-group-random.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "F05-U05",
+    "title": "部分集合は全曲の順位に従い、解除すると元の順に復帰できる",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F05-U05"
+    ],
+    "file": "tests/unit/song-group-random.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "F05-U06",
+    "title": "選び直しによる無効化後は新しい乱数列で順序を生成",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F05-U06"
+    ],
+    "file": "tests/unit/song-group-random.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "F05-U07",
+    "title": "CSVデータ配列が置き換わると新しい曲名集合へ追従",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F05-U07"
+    ],
+    "file": "tests/unit/song-group-random.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "F05-U08",
+    "title": "0件・1曲でも正しく扱い、乱数を消費しない",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F05-U08"
+    ],
+    "file": "tests/unit/song-group-random.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "F05-U09",
+    "title": "特殊な曲名もMapで安全に扱い、曲名の表記を変えない",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F05-U09"
+    ],
+    "file": "tests/unit/song-group-random.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "F05-U10",
+    "title": "F05以外のJavaScript・HTML・CSSは最新mainと完全一致",
+    "data": "P",
+    "note": "ソース文字列一致依存。挙動契約へ統合・置換し旧IDを対応付ける",
+    "destination": [
+      "F05-U01",
+      "F05-U04",
+      "F05-B02",
+      "F05-B10",
+      "F05-B13",
+      "F08-B08",
+      "CSV-U01",
+      "BASE-B03"
+    ],
+    "file": "tests/unit/song-group-random.test.cjs",
+    "reason": "ソース一致を廃止し、列挙した動作・保存・描画契約へ統合"
+  },
+  {
+    "id": "F06-U01",
+    "title": "配信記録数・表示済み件数を日英で区別",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F06-U01"
+    ],
+    "file": "tests/unit/ui-feedback.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "F06-U02",
+    "title": "曲名グループ数と歌唱履歴件数を日英で区別",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F06-U02"
+    ],
+    "file": "tests/unit/ui-feedback.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "F06-U03",
+    "title": "0件の結果を表示し、loading/errorのクリアと区別",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F06-U03"
+    ],
+    "file": "tests/unit/ui-feedback.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "F06-U04",
+    "title": "短時間の連続更新は500msの通知1件にまとめる",
+    "data": "S",
+    "note": "非同期の完了条件・操作順を保持し、単純な待ち時間延長で隠さない",
+    "destination": [
+      "F06-U04"
+    ],
+    "file": "tests/unit/ui-feedback.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "F06-U05",
+    "title": "自動追加の視覚件数更新だけでは読み上げを繰り返さない",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F06-U05"
+    ],
+    "file": "tests/unit/ui-feedback.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "F06-U06",
+    "title": "手動追加は日英で意味のある更新を速やかに通知",
+    "data": "S",
+    "note": "非同期の完了条件・操作順を保持し、単純な待ち時間延長で隠さない",
+    "destination": [
+      "F06-U06"
+    ],
+    "file": "tests/unit/ui-feedback.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "F06-U07",
+    "title": "古いviewRevisionの通知は実行しない",
+    "data": "S",
+    "note": "非同期の完了条件・操作順を保持し、単純な待ち時間延長で隠さない",
+    "destination": [
+      "F06-U07"
+    ],
+    "file": "tests/unit/ui-feedback.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "F06-U08",
+    "title": "error/loading中やクリア後は予約通知を出さない",
+    "data": "S",
+    "note": "非同期の完了条件・操作順を保持し、単純な待ち時間延長で隠さない",
+    "destination": [
+      "F06-U08"
+    ],
+    "file": "tests/unit/ui-feedback.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "F06-U09",
+    "title": "視覚表示と独立したatomic status、初期aria-pressedを持つ",
+    "data": "S",
+    "note": "非同期の完了条件・操作順を保持し、単純な待ち時間延長で隠さない",
+    "destination": [
+      "F06-U09"
+    ],
+    "file": "tests/unit/ui-feedback.test.cjs",
+    "reason": "入力・操作・assertionを維持。実行対象とfixtureの解決だけ共通化"
+  },
+  {
+    "id": "F06-U10",
+    "title": "F05順位生成・履歴順の決定、F08、CSV検証と通信、保存・抽選は起点mainと同じ",
+    "data": "P",
+    "note": "ソース文字列一致依存。挙動契約へ統合・置換し旧IDを対応付ける",
+    "destination": [
+      "F05-U01",
+      "F05-B02",
+      "F08-B08",
+      "CSV-U01",
+      "CSV-B10",
+      "RS-U04",
+      "RS-U07",
+      "BASE-B03",
+      "LAZY-B02"
+    ],
+    "file": "tests/unit/ui-feedback.test.cjs",
+    "reason": "ソース一致を廃止し、列挙した動作・保存・描画契約へ統合"
+  },
+  {
+    "id": "F06-U11",
+    "title": "固定F06差分の外側はJavaScript・HTML・CSS全体で変更なし",
+    "data": "P",
+    "note": "ソース文字列一致依存。挙動契約へ統合・置換し旧IDを対応付ける",
+    "destination": [
+      "F06-U09",
+      "F06-B01",
+      "F06-B02",
+      "F06-B11",
+      "F06-B20",
+      "F06-B22",
+      "F05-B13",
+      "F08-B08",
+      "CSV-B10",
+      "BASE-B03"
+    ],
+    "file": "tests/unit/ui-feedback.test.cjs",
+    "reason": "ソース一致を廃止し、列挙した動作・保存・描画契約へ統合"
+  },
+  {
+    "id": "CSV-B01",
+    "title": "現行CSV：ready・初期20件・全公開データ・診断APIのコピー",
+    "data": "D",
+    "note": "保存CSVを固定し、liveの件数増減で更新しない。非同期の完了条件・操作順を保持し、単純な待ち時間延長で隠さない",
+    "destination": [
+      "CSV-B01"
+    ],
+    "file": "tests/browser/csv-loading.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "CSV-B02",
+    "title": "必須列欠落：全体エラーと再試行",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-B02"
+    ],
+    "file": "tests/browser/csv-loading.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "CSV-B03",
+    "title": "重複ヘッダー：全体エラーと再試行",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-B03"
+    ],
+    "file": "tests/browser/csv-loading.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "CSV-B04",
+    "title": "引用符異常：全体エラーと再試行",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-B04"
+    ],
+    "file": "tests/browser/csv-loading.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "CSV-B05",
+    "title": "列数不一致：不正行だけ除外し、正常データと日本語／英語の件数通知を維持",
+    "data": "S",
+    "note": "非同期の完了条件・操作順を保持し、単純な待ち時間延長で隠さない",
+    "destination": [
+      "CSV-B05"
+    ],
+    "file": "tests/browser/csv-loading.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "CSV-B06",
+    "title": "公開情報欠落・不正日付・偽装URLが混在しても正常行を表示・抽選する",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-B06"
+    ],
+    "file": "tests/browser/csv-loading.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "CSV-B07",
+    "title": "警告のみのデータを削除・書換えしない、一般画面に診断詳細を出さない",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-B07"
+    ],
+    "file": "tests/browser/csv-loading.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "CSV-B08",
+    "title": "単独MV・カバーは頭出し時刻なしで再生候補になる",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-B08"
+    ],
+    "file": "tests/browser/csv-loading.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "CSV-B09",
+    "title": "NETWORK_ERROR：検索・リセット・モード・言語変更後もerrorを維持",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-B09"
+    ],
+    "file": "tests/browser/csv-loading.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "CSV-B10",
+    "title": "HTTP_ERROR：検索・リセット・モード・言語変更後もerrorを維持",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-B10"
+    ],
+    "file": "tests/browser/csv-loading.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "CSV-B11",
+    "title": "loading中の操作で0件表示にせず、標準30秒の待機上限を設定",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-B11"
+    ],
+    "file": "tests/browser/csv-loading.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "CSV-B12",
+    "title": "実XHRタイムアウト・遅延応答を無視・再試行で復帰",
+    "data": "S",
+    "note": "非同期の完了条件・操作順を保持し、単純な待ち時間延長で隠さない",
+    "destination": [
+      "CSV-B12"
+    ],
+    "file": "tests/browser/csv-loading.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "CSV-B13",
+    "title": "連続再読込で旧要求を中断し、旧成功・失敗コールバックが新結果を上書きしない",
+    "data": "S",
+    "note": "非同期の完了条件・操作順を保持し、単純な待ち時間延長で隠さない",
+    "destination": [
+      "CSV-B13"
+    ],
+    "file": "tests/browser/csv-loading.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "CSV-B14",
+    "title": "予約済み描画と読込失敗の競合でエラーを上書きしない",
+    "data": "S",
+    "note": "非同期の完了条件・操作順を保持し、単純な待ち時間延長で隠さない",
+    "destination": [
+      "CSV-B14"
+    ],
+    "file": "tests/browser/csv-loading.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "CSV-B15",
+    "title": "PapaParse missingも一覧と抽選を同じエラー状態にする",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-B15"
+    ],
+    "file": "tests/browser/csv-loading.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "CSV-B16",
+    "title": "PapaParse throwsも一覧と抽選を同じエラー状態にする",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-B16"
+    ],
+    "file": "tests/browser/csv-loading.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "CSV-B17",
+    "title": "全公開行の除外はerror、再試行後も履歴・お気に入りは保存互換",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-B17"
+    ],
+    "file": "tests/browser/csv-loading.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "CSV-B18",
+    "title": "F/G動画ID不一致の警告は行を除外せず、URL・再生候補を維持",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-B18"
+    ],
+    "file": "tests/browser/csv-loading.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "CSV-B19",
+    "title": "元から公開0件はreadyを維持し、通常の0件表示と抽選候補ゼロになる",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-B19"
+    ],
+    "file": "tests/browser/csv-loading.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "CSV-B20",
+    "title": "非公開行だけ正常でも全公開行が列数異常ならerror、部分的除外ならready",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-B20"
+    ],
+    "file": "tests/browser/csv-loading.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "CSV-B21",
+    "title": "保存CSV「絶対零度」?=0は1件だけ警告し、既存2,763件を維持",
+    "data": "H",
+    "note": "既知「絶対零度」?=0の1警告・行番号を保持",
+    "destination": [
+      "CSV-B21"
+    ],
+    "file": "tests/browser/csv-loading.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "CSV-B22",
+    "title": "秒数なしのMVと一般共有パラメータを誤警告しない",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "CSV-B22"
+    ],
+    "file": "tests/browser/csv-loading.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F08-B01",
+    "title": "逆順CSVを初期20件と追加表示の両方で時刻順にする・1280px/375px",
+    "data": "S",
+    "note": "非同期の完了条件・操作順を保持し、単純な待ち時間延長で隠さない",
+    "destination": [
+      "F08-B01"
+    ],
+    "file": "tests/browser/session-order-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F08-B02",
+    "title": "t/start/#t・複合時刻・指定なし・同時刻の表示順",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F08-B02"
+    ],
+    "file": "tests/browser/session-order-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F08-B03",
+    "title": "不正時刻がある配信だけCSV順に戻し、他の配信は時刻順・警告を維持",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F08-B03"
+    ],
+    "file": "tests/browser/session-order-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F08-B04",
+    "title": "空名パラメータでも該当配信のCSV順とF01の警告を維持",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F08-B04"
+    ],
+    "file": "tests/browser/session-order-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F08-B05",
+    "title": "複数配信の新しい順・古い順は従来どおり、配信内だけ昇順",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F08-B05"
+    ],
+    "file": "tests/browser/session-order-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F08-B06",
+    "title": "配信枠ランダムの処理は維持し、配信内は昇順",
+    "data": "S",
+    "note": "旧配信枠ランダムの厳密順はエンジン依存。多ブラウザ化は集合・配信内順を契約にする",
+    "destination": [
+      "F08-B06"
+    ],
+    "file": "tests/browser/session-order-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F08-B07",
+    "title": "曲名一覧・歌唱履歴の日付順は頭出し時刻順へ変えない",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F08-B07"
+    ],
+    "file": "tests/browser/session-order-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F08-B08",
+    "title": "実CSVの公開2,733件・205配信と全リンク集合／配信内の期待順を維持",
+    "data": "D",
+    "note": "保存CSVを固定し、liveの件数増減で更新しない",
+    "destination": [
+      "F08-B08"
+    ],
+    "file": "tests/browser/session-order-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F08-B09",
+    "title": "未表示の31件目が不正時刻でも、初期20件から配信全体のCSV順を保つ",
+    "data": "S",
+    "note": "非同期の完了条件・操作順を保持し、単純な待ち時間延長で隠さない",
+    "destination": [
+      "F08-B09"
+    ],
+    "file": "tests/browser/session-order-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F05-B01",
+    "title": "固定乱数0で曲名グループが期待順になり、同名履歴を分割しない",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F05-B01"
+    ],
+    "file": "tests/browser/song-group-random-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F05-B02",
+    "title": "ランダムでも全グループの歌唱履歴が新しい順、閉じるとカードを解放",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F05-B02"
+    ],
+    "file": "tests/browser/song-group-random-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F05-B03",
+    "title": "検索の絞り込み・該当なし・解除でも順位と乱数呼出し回数を維持",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F05-B03"
+    ],
+    "file": "tests/browser/song-group-random-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F05-B04",
+    "title": "カテゴリ・配信絞り込みと解除でも元のランダム順位を維持",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F05-B04"
+    ],
+    "file": "tests/browser/song-group-random-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F05-B05",
+    "title": "お気に入り絞り込み・storage同期と解除でも順位を維持し保存形式は従来どおり",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F05-B05"
+    ],
+    "file": "tests/browser/song-group-random-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F05-B06",
+    "title": "日英切替・テーマ切替後も元のランダム順位と乱数回数を維持",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F05-B06"
+    ],
+    "file": "tests/browser/song-group-random-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F05-B07",
+    "title": "絞り込み中にランダムを選んでも全曲名の順序を作り、解除後に復元",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F05-B07"
+    ],
+    "file": "tests/browser/song-group-random-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F05-B08",
+    "title": "別の並び順からランダムへ再選択すると新しい順、元と同順も正常",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F05-B08"
+    ],
+    "file": "tests/browser/song-group-random-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F05-B09",
+    "title": "新しい順・古い順のグループ代表日と歌唱履歴は起点mainと同じ",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F05-B09"
+    ],
+    "file": "tests/browser/song-group-random-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F05-B10",
+    "title": "配信枠一覧のランダムを維持し、検索結果の曲名グループだけ順位を保持",
+    "data": "S",
+    "note": "旧配信枠ランダムの厳密順はエンジン依存。多ブラウザ化は集合・配信内順を契約にする",
+    "destination": [
+      "F05-B10"
+    ],
+    "file": "tests/browser/song-group-random-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F05-B11",
+    "title": "この曲の歌唱履歴を見るは従来どおり全履歴を新しい順で開き、再ランダムも動作",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F05-B11"
+    ],
+    "file": "tests/browser/song-group-random-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F05-B12",
+    "title": "連続した検索・並び順の変更でも最後の条件だけを描画",
+    "data": "S",
+    "note": "非同期の完了条件・操作順を保持し、単純な待ち時間延長で隠さない",
+    "destination": [
+      "F05-B12"
+    ],
+    "file": "tests/browser/song-group-random-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F05-B13",
+    "title": "現行CSVの2,733記録・681曲名・205配信と全履歴を保持し、遅延生成・解放を維持",
+    "data": "D",
+    "note": "保存CSVを固定し、liveの件数増減で更新しない",
+    "destination": [
+      "F05-B13"
+    ],
+    "file": "tests/browser/song-group-random-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F05-B14",
+    "title": "CSV再取得でデータ集合が変わっても順位を再作成し古い曲名を残さない",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F05-B14"
+    ],
+    "file": "tests/browser/song-group-random-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "THEME-B01",
+    "title": "保存なしの初期テーマは端末のライト／ダークに従い、保存しない",
+    "data": "D",
+    "note": "保存CSVを固定し、liveの件数増減で更新しない。非同期の完了条件・操作順を保持し、単純な待ち時間延長で隠さない",
+    "destination": [
+      "THEME-B01"
+    ],
+    "file": "tests/browser/theme-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "THEME-B02",
+    "title": "端末と保存設定が異なる両方向で、保存設定を優先",
+    "data": "D",
+    "note": "保存CSVを固定し、liveの件数増減で更新しない",
+    "destination": [
+      "THEME-B02"
+    ],
+    "file": "tests/browser/theme-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "THEME-B03",
+    "title": "マウスで両方向の即時切替・専用キー保存、一覧を再描画しない",
+    "data": "D",
+    "note": "保存CSVを固定し、liveの件数増減で更新しない",
+    "destination": [
+      "THEME-B03"
+    ],
+    "file": "tests/browser/theme-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "THEME-B04",
+    "title": "再読み込みと同じブラウザの新しいタブでも両モードを復元",
+    "data": "D",
+    "note": "保存CSVを固定し、liveの件数増減で更新しない",
+    "destination": [
+      "THEME-B04"
+    ],
+    "file": "tests/browser/theme-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "THEME-B05",
+    "title": "不正保存値7種は未設定扱い、次の明示操作で正常値を保存",
+    "data": "D",
+    "note": "保存CSVを固定し、liveの件数増減で更新しない",
+    "destination": [
+      "THEME-B05"
+    ],
+    "file": "tests/browser/theme-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "THEME-B06",
+    "title": "storageの読取・書込・getter例外でも表示・切替・言語変更が動作",
+    "data": "D",
+    "note": "保存CSVを固定し、liveの件数増減で更新しない",
+    "destination": [
+      "THEME-B06"
+    ],
+    "file": "tests/browser/theme-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "THEME-B07",
+    "title": "日英切替とテーマ切替を繰り返しても文言・保存回数は正しい",
+    "data": "D",
+    "note": "保存CSVを固定し、liveの件数増減で更新しない",
+    "destination": [
+      "THEME-B07"
+    ],
+    "file": "tests/browser/theme-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "THEME-B08",
+    "title": "Tab・Enter・Spaceで切替、両モード・両言語で明瞭なフォーカス",
+    "data": "D",
+    "note": "保存CSVを固定し、liveの件数増減で更新しない。非同期の完了条件・操作順を保持し、単純な待ち時間延長で隠さない",
+    "destination": [
+      "THEME-B08"
+    ],
+    "file": "tests/browser/theme-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "THEME-B09",
+    "title": "375pxのタップで1回だけ切替・保存",
+    "data": "D",
+    "note": "保存CSVを固定し、liveの件数増減で更新しない",
+    "destination": [
+      "THEME-B09"
+    ],
+    "file": "tests/browser/theme-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "THEME-B10",
+    "title": "375/1280px・日英・ライト/ダーク8通りで配置・視認性・横幅を維持",
+    "data": "D",
+    "note": "保存CSVを固定し、liveの件数増減で更新しない",
+    "destination": [
+      "THEME-B10"
+    ],
+    "file": "tests/browser/theme-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "THEME-B11",
+    "title": "本体JSの読込待ちでもheadでテーマを適用し、保存値・端末設定を反映",
+    "data": "D",
+    "note": "保存CSVを固定し、liveの件数増減で更新しない",
+    "destination": [
+      "THEME-B11"
+    ],
+    "file": "tests/browser/theme-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "THEME-B12",
+    "title": "CSV通信エラー中もテーマ切替可能、F04のerror状態を維持",
+    "data": "D",
+    "note": "保存CSVを固定し、liveの件数増減で更新しない",
+    "destination": [
+      "THEME-B12"
+    ],
+    "file": "tests/browser/theme-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "BASE-B01",
+    "title": "初期表示・検索と抽選の独立・抽選後の情報表示",
+    "data": "S",
+    "note": "非同期の完了条件・操作順を保持し、単純な待ち時間延長で隠さない",
+    "destination": [
+      "BASE-B01"
+    ],
+    "file": "tests/browser/browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "BASE-B02",
+    "title": "YouTube頭出しURL・別タブへの遷移（遷移先はテスト応答）",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "BASE-B02"
+    ],
+    "file": "tests/browser/browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "BASE-B03",
+    "title": "既存お気に入りの維持・抽選結果と一覧の双方向同期",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "BASE-B03"
+    ],
+    "file": "tests/browser/browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "BASE-B04",
+    "title": "完全一致の全公開歌唱履歴・他フィルタ解除・新しい順・開閉とスクロール",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "BASE-B04"
+    ],
+    "file": "tests/browser/browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "BASE-B05",
+    "title": "カテゴリ変更で結果を閉じる・言語切替で選択条件と抽選結果を保持・イベント重複なし",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "BASE-B05"
+    ],
+    "file": "tests/browser/browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "BASE-B06",
+    "title": "4分類の選択肢・抽選対象・変更時の結果消去と共通履歴・日英切替",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "BASE-B06"
+    ],
+    "file": "tests/browser/browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "BASE-B07",
+    "title": "抽選→閉じる→再抽選・結果内の再抽選・検索リセット・履歴表示からの閉じる",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "BASE-B07"
+    ],
+    "file": "tests/browser/browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "BASE-B08",
+    "title": "新機能のボタンは選択言語のみ・PC／375pxのボタンサイズと両テーマ",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "BASE-B08"
+    ],
+    "file": "tests/browser/browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "BASE-B09",
+    "title": "6画面幅と992pxの境界・日英×両テーマ×通常／長い文字列のレスポンシブ表示",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "BASE-B09"
+    ],
+    "file": "tests/browser/browser.test.cjs",
+    "reason": "入力・操作・境界検査を維持。1行固定を、自然な折り返しを許容する縦横の収まり・非重複・操作領域検査へ置換。お気に入り両ラベルと判定の故障注入も確認。docs/responsive-checks.md参照"
+  },
+  {
+    "id": "BASE-B10",
+    "title": "高速な連続操作・直近10曲回避・再抽選時にフォーカスとスクロールを維持",
+    "data": "S",
+    "note": "非同期の完了条件・操作順を保持し、単純な待ち時間延長で隠さない",
+    "destination": [
+      "BASE-B10"
+    ],
+    "file": "tests/browser/browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "BASE-B11",
+    "title": "データ文字列のHTMLを実行しない・375pxの長い文字列・ライト／ダーク",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "BASE-B11"
+    ],
+    "file": "tests/browser/browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "BASE-B12",
+    "title": "同一タブの再読込で抽選履歴を保持",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "BASE-B12"
+    ],
+    "file": "tests/browser/browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "BASE-B13",
+    "title": "候補ゼロ・CSV通信失敗の補助メッセージ",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "BASE-B13"
+    ],
+    "file": "tests/browser/browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "BASE-B14",
+    "title": "実データで4分類の対象記録を照合し、各分類から連続抽選",
+    "data": "D",
+    "note": "保存CSVを固定し、liveの件数増減で更新しない。非同期の完了条件・操作順を保持し、単純な待ち時間延長で隠さない",
+    "destination": [
+      "BASE-B14"
+    ],
+    "file": "tests/browser/browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "BASE-B15",
+    "title": "実際の公開CSVで抽選・履歴表示・PC／375pxと両テーマのスクリーンショット",
+    "data": "D",
+    "note": "保存CSVを固定し、liveの件数増減で更新しない",
+    "destination": [
+      "BASE-B15"
+    ],
+    "file": "tests/browser/browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "LAZY-B01",
+    "title": "実CSVの初期表示は20カード以下・保存領域の読み込みは1回・PC/375px",
+    "data": "D",
+    "note": "保存CSVを固定し、liveの件数増減で更新しない。非同期の完了条件・操作順を保持し、単純な待ち時間延長で隠さない",
+    "destination": [
+      "LAZY-B01"
+    ],
+    "file": "tests/browser/progressive-rendering.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "LAZY-B02",
+    "title": "実スクロールで追加表示し、配信枠を分割しても見出し・曲順を維持",
+    "data": "D",
+    "note": "保存CSVを固定し、liveの件数増減で更新しない",
+    "destination": [
+      "LAZY-B02"
+    ],
+    "file": "tests/browser/progressive-rendering.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "LAZY-B03",
+    "title": "実CSVの全2,733件へ到達し、欠落・順序混在・余分な重複がない",
+    "data": "D",
+    "note": "保存CSVを固定し、liveの件数増減で更新しない",
+    "destination": [
+      "LAZY-B03"
+    ],
+    "file": "tests/browser/progressive-rendering.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "LAZY-B04",
+    "title": "未表示の古い歌唱も検索・4分類の抽選・完全一致の全履歴の対象",
+    "data": "D",
+    "note": "保存CSVを固定し、liveの件数増減で更新しない",
+    "destination": [
+      "LAZY-B04"
+    ],
+    "file": "tests/browser/progressive-rendering.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "LAZY-B05",
+    "title": "曲名一覧は開く時だけ生成し、閉じると破棄・再開時のお気に入りも正しい",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "LAZY-B05"
+    ],
+    "file": "tests/browser/progressive-rendering.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "LAZY-B06",
+    "title": "抽選では一覧の星を走査・更新せず、同一形式の保存とstorageイベントに対応",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "LAZY-B06"
+    ],
+    "file": "tests/browser/progressive-rendering.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "LAZY-B07",
+    "title": "追加描画予約と検索・並べ替えの競合をキャンセルし、連続変更は最後の条件のみ",
+    "data": "S",
+    "note": "非同期の完了条件・操作順を保持し、単純な待ち時間延長で隠さない",
+    "destination": [
+      "LAZY-B07"
+    ],
+    "file": "tests/browser/progressive-rendering.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "LAZY-B08",
+    "title": "IntersectionObserverがない環境も手動追加で全件を表示できる",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "LAZY-B08"
+    ],
+    "file": "tests/browser/progressive-rendering.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F06-B01",
+    "title": "お気に入り絞り込みのaria-pressedは初期・ON/OFF・言語・リセット・再読込と一致",
+    "data": "S",
+    "note": "非同期の完了条件・操作順を保持し、単純な待ち時間延長で隠さない",
+    "destination": [
+      "F06-B01"
+    ],
+    "file": "tests/browser/ui-feedback-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F06-B02",
+    "title": "キーボード解除は次のカードへ引継ぎ（EnterとSpace）",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F06-B02"
+    ],
+    "file": "tests/browser/ui-feedback-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F06-B03",
+    "title": "次がない最後のカードの解除は前のカードへ引継ぎ",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F06-B03"
+    ],
+    "file": "tests/browser/ui-feedback-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F06-B04",
+    "title": "最後の1件を解除すると上部のお気に入り絞り込みへ戻る",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F06-B04"
+    ],
+    "file": "tests/browser/ui-feedback-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F06-B05",
+    "title": "マウスで解除した場合は別の星や上部ボタンへ移動しない",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F06-B05"
+    ],
+    "file": "tests/browser/ui-feedback-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F06-B06",
+    "title": "別タブ相当のstorage更新ではフォーカスを移動しない",
+    "data": "S",
+    "note": "非同期の完了条件・操作順を保持し、単純な待ち時間延長で隠さない",
+    "destination": [
+      "F06-B06"
+    ],
+    "file": "tests/browser/ui-feedback-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F06-B07",
+    "title": "解除後の非同期描画より新しい検索操作を優先しフォーカスを奪わない",
+    "data": "S",
+    "note": "非同期の完了条件・操作順を保持し、単純な待ち時間延長で隠さない",
+    "destination": [
+      "F06-B07"
+    ],
+    "file": "tests/browser/ui-feedback-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F06-B08",
+    "title": "解除後にTabで別操作へ進んだ場合とpointerdown後は古いフォーカス引継ぎを中止",
+    "data": "S",
+    "note": "非同期の完了条件・操作順を保持し、単純な待ち時間延長で隠さない",
+    "destination": [
+      "F06-B08"
+    ],
+    "file": "tests/browser/ui-feedback-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F06-B09",
+    "title": "曲名一覧の解除は必要なグループだけを再展開して次の星へ引継ぎ",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F06-B09"
+    ],
+    "file": "tests/browser/ui-feedback-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F06-B10",
+    "title": "曲名グループの最後の1件を解除しても次のグループへ引継ぎ",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F06-B10"
+    ],
+    "file": "tests/browser/ui-feedback-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F06-B11",
+    "title": "追加表示後の解除も20件単位を維持して次のカードへ引継ぎ",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F06-B11"
+    ],
+    "file": "tests/browser/ui-feedback-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F06-B12",
+    "title": "通常の星ON/OFFとおまかせ側の操作では元のボタンのフォーカスを保持",
+    "data": "S",
+    "note": "非同期の完了条件・操作順を保持し、単純な待ち時間延長で隠さない",
+    "destination": [
+      "F06-B12"
+    ],
+    "file": "tests/browser/ui-feedback-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F06-B13",
+    "title": "検索・カテゴリ・配信・お気に入り・表示モードの件数がデータと一致",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F06-B13"
+    ],
+    "file": "tests/browser/ui-feedback-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F06-B14",
+    "title": "曲名グループ数と全履歴数はカード未生成でも正しい",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F06-B14"
+    ],
+    "file": "tests/browser/ui-feedback-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F06-B15",
+    "title": "自動追加は画面件数だけ更新し、手動追加でのみ追加を通知",
+    "data": "S",
+    "note": "非同期の完了条件・操作順を保持し、単純な待ち時間延長で隠さない",
+    "destination": [
+      "F06-B15"
+    ],
+    "file": "tests/browser/ui-feedback-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F06-B16",
+    "title": "検索入力が連続しても読み上げ通知は確定後の1回に集約",
+    "data": "S",
+    "note": "非同期の完了条件・操作順を保持し、単純な待ち時間延長で隠さない",
+    "destination": [
+      "F06-B16"
+    ],
+    "file": "tests/browser/ui-feedback-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F06-B17",
+    "title": "状態通知だけではスクロールやフォーカスを変更しない",
+    "data": "S",
+    "note": "非同期の完了条件・操作順を保持し、単純な待ち時間延長で隠さない",
+    "destination": [
+      "F06-B17"
+    ],
+    "file": "tests/browser/ui-feedback-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F06-B18",
+    "title": "結果なし・日英・リセットでも件数と既存該当なし表示が整合",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F06-B18"
+    ],
+    "file": "tests/browser/ui-feedback-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F06-B19",
+    "title": "通信失敗・再試行・再読込中は件数を消し、errorを0件に変えない",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F06-B19"
+    ],
+    "file": "tests/browser/ui-feedback-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F06-B20",
+    "title": "古い検索・追加表示予約を新しいフィルタと通信エラーが上書き",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F06-B20"
+    ],
+    "file": "tests/browser/ui-feedback-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F06-B21",
+    "title": "対象文字と操作状態をライト・ダークで実測し基準を満たす",
+    "data": "S",
+    "note": "既存の期待値・操作シナリオを移植。仕様変更時だけ対応する契約を更新",
+    "destination": [
+      "F06-B21"
+    ],
+    "file": "tests/browser/ui-feedback-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F06-B22",
+    "title": "Tab・Enter・Spaceによるフィルタ・星・追加表示とフォーカス枠",
+    "data": "S",
+    "note": "非同期の完了条件・操作順を保持し、単純な待ち時間延長で隠さない",
+    "destination": [
+      "F06-B22"
+    ],
+    "file": "tests/browser/ui-feedback-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F06-B23",
+    "title": "1280・768・375px×日英×両テーマで文字切れ・重なり・横スクロールなし",
+    "data": "D",
+    "note": "保存CSVを固定し、liveの件数増減で更新しない",
+    "destination": [
+      "F06-B23"
+    ],
+    "file": "tests/browser/ui-feedback-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  },
+  {
+    "id": "F06-B24",
+    "title": "実CSV全2,763記録・公開2,733・681曲名・205配信と遅延生成を維持",
+    "data": "D",
+    "note": "保存CSVを固定し、liveの件数増減で更新しない",
+    "destination": [
+      "F06-B24"
+    ],
+    "file": "tests/browser/ui-feedback-browser.test.cjs",
+    "reason": "操作・合成データ・assertionを維持。Playwright Test登録、動的origin、共通通信guardへ移行"
+  }
+]
