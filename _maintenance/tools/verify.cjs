@@ -6,3 +6,5 @@ for(const [name,version]of Object.entries(require('../package.json').devDependen
 const map=require('../docs/migration-map.json');assert.equal(map.length,174);assert.equal(new Set(map.map(e=>e.id)).size,174);
 for(const entry of map){assert(entry.destination.length,entry.id);for(const id of entry.destination)assert(map.some(e=>e.id===id),id);}
 console.log('Fixture bytes/SHA-256, installed dependency versions, and 174 migration entries verified.');
+require('../helpers/vendor.cjs').verifyFiles();
+console.log('Public vendor/license bytes and pinned npm distribution files verified.');

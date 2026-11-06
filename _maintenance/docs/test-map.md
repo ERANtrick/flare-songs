@@ -188,9 +188,10 @@ F08-U08～U10は旧実装との比較から、動画ID＋時刻、固定snapshot
 ## 追加枠
 
 - F02-{width}-{lang}-{theme}：9幅×日英×両テーマ36ケース。旧verify-f02.cjsのmeasure/assertFitsと配信・検索・カテゴリ・並替え・リセット・星・抽選操作を回収。旧before/candidate CSS差替えは廃止し、checkoutの実CSSだけを検証します。
-- F07-U01～U06：動的server／project path、非公開パス／method、未知通信、CDN版とasset、snapshot bytes／hash、174IDの目的追跡。
+- F07-U01～U06：動的server／project path、非公開パス／method、未知通信・CDN拒否、公開vendorと固定npmのbyte/hash、snapshot bytes／hash、174IDの目的追跡。
 - F07-B01：/flare-songs/配下でのリソース解決・テーマ・681曲名の表示。
-- LIVE-1280／375：実通信の別コマンド。固定210件に含めません。
+- LIVE-1280／375：実通信の別コマンド。固定回帰に含めません。
+- F10-U01～U05／B01～B03：旧210件の目的を維持し、未改変vendor・LICENSE・map・読み込み契約・破損拒否・同一origin HTTP取得・8表示条件・project subpath・Papa404の8件を追加。現在218件です。[変更一覧](vendor-assets.md)を参照してください。
 
 ## 今後の変更
 

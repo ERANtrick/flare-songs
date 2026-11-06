@@ -1,0 +1,131 @@
+{
+  "description": "Unmodified npm distribution bytes. Runtime files and complete self-contained maps are public; this manifest is maintenance-only.",
+  "files": [
+    {
+      "path": "assets/vendor/bootstrap-5.3.2/bootstrap.min.css",
+      "role": "runtime",
+      "package": "bootstrap",
+      "version": "5.3.2",
+      "source": "dist/css/bootstrap.min.css",
+      "tarball": "https://registry.npmjs.org/bootstrap/-/bootstrap-5.3.2.tgz",
+      "integrity": "sha512-D32nmNWiQHo94BKHLmOrdjlL05q1c8oxbtBphQFb9Z5to6eGRDCm0QgeaZ4zFBHzfg2++rqa2JkqCcxDy0sH0g==",
+      "bytes": 232948,
+      "sha256": "3017df4a76db5f01c2b99b603d88b03106df13bcfe18e67b7c13c2341d3a67df"
+    },
+    {
+      "path": "assets/vendor/bootstrap-5.3.2/bootstrap.bundle.min.js",
+      "role": "runtime",
+      "package": "bootstrap",
+      "version": "5.3.2",
+      "source": "dist/js/bootstrap.bundle.min.js",
+      "tarball": "https://registry.npmjs.org/bootstrap/-/bootstrap-5.3.2.tgz",
+      "integrity": "sha512-D32nmNWiQHo94BKHLmOrdjlL05q1c8oxbtBphQFb9Z5to6eGRDCm0QgeaZ4zFBHzfg2++rqa2JkqCcxDy0sH0g==",
+      "bytes": 80663,
+      "sha256": "82f64f62bb03c1bc1824b0f9c9e05f70dba33e146818e63cdf5c306c8cf3dedd"
+    },
+    {
+      "path": "assets/vendor/papaparse-5.3.2/papaparse.min.js",
+      "role": "runtime",
+      "package": "papaparse",
+      "version": "5.3.2",
+      "source": "papaparse.min.js",
+      "tarball": "https://registry.npmjs.org/papaparse/-/papaparse-5.3.2.tgz",
+      "integrity": "sha512-6dNZu0Ki+gyV0eBsFKJhYr+MdQYAzFUGlBMNj3GNrmHxmz1lfRa24CjFObPXtjcetlOv5Ad299MhIK0znp3afw==",
+      "bytes": 18907,
+      "sha256": "51eeb0a26e3c4906e99b05bd40893ba72543479060dfa49eb4febb576a439317"
+    },
+    {
+      "path": "assets/vendor/bootstrap-5.3.2/bootstrap.min.css.map",
+      "role": "source-map",
+      "package": "bootstrap",
+      "version": "5.3.2",
+      "source": "dist/css/bootstrap.min.css.map",
+      "tarball": "https://registry.npmjs.org/bootstrap/-/bootstrap-5.3.2.tgz",
+      "integrity": "sha512-D32nmNWiQHo94BKHLmOrdjlL05q1c8oxbtBphQFb9Z5to6eGRDCm0QgeaZ4zFBHzfg2++rqa2JkqCcxDy0sH0g==",
+      "bytes": 589161,
+      "sha256": "8c99b4ed590bd40f66742bfaebfb26775ca803d88273b87b9df9f9dc05f7f1c7"
+    },
+    {
+      "path": "assets/vendor/bootstrap-5.3.2/bootstrap.bundle.min.js.map",
+      "role": "source-map",
+      "package": "bootstrap",
+      "version": "5.3.2",
+      "source": "dist/js/bootstrap.bundle.min.js.map",
+      "tarball": "https://registry.npmjs.org/bootstrap/-/bootstrap-5.3.2.tgz",
+      "integrity": "sha512-D32nmNWiQHo94BKHLmOrdjlL05q1c8oxbtBphQFb9Z5to6eGRDCm0QgeaZ4zFBHzfg2++rqa2JkqCcxDy0sH0g==",
+      "bytes": 331886,
+      "sha256": "19a5b0b88d24d6b154c4462896c9631c0b317d71f22eebbf0b9e405db4351fd1"
+    },
+    {
+      "path": "licenses/bootstrap-5.3.2-LICENSE.txt",
+      "role": "license",
+      "package": "bootstrap",
+      "version": "5.3.2",
+      "source": "LICENSE",
+      "tarball": "https://registry.npmjs.org/bootstrap/-/bootstrap-5.3.2.tgz",
+      "integrity": "sha512-D32nmNWiQHo94BKHLmOrdjlL05q1c8oxbtBphQFb9Z5to6eGRDCm0QgeaZ4zFBHzfg2++rqa2JkqCcxDy0sH0g==",
+      "bytes": 1093,
+      "sha256": "3d0b0c88216e4752b9afd3d24e36faaf27873b5a45a61458bb3c83e794c26832"
+    },
+    {
+      "path": "licenses/papaparse-5.3.2-LICENSE.txt",
+      "role": "license",
+      "package": "papaparse",
+      "version": "5.3.2",
+      "source": "LICENSE",
+      "tarball": "https://registry.npmjs.org/papaparse/-/papaparse-5.3.2.tgz",
+      "integrity": "sha512-6dNZu0Ki+gyV0eBsFKJhYr+MdQYAzFUGlBMNj3GNrmHxmz1lfRa24CjFObPXtjcetlOv5Ad299MhIK0znp3afw==",
+      "bytes": 1079,
+      "sha256": "99aa68e4b42758b09828a46515f70369e5463458ab7a990189f641af2b8d9b4e"
+    },
+    {
+      "path": "licenses/popper-2.11.8-LICENSE.txt",
+      "role": "license",
+      "package": "@popperjs/core",
+      "version": "2.11.8",
+      "source": "LICENSE.md",
+      "tarball": "https://registry.npmjs.org/@popperjs/core/-/core-2.11.8.tgz",
+      "integrity": "sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==",
+      "bytes": 1082,
+      "sha256": "bf67e2c9b7974543bb18ced3a0b37f53729aaff953b442dd89a3adaf90fd93e8"
+    },
+    {
+      "path": "licenses/rfs-10.0.0-LICENSE.txt",
+      "role": "license",
+      "package": "rfs",
+      "version": "10.0.0",
+      "source": "LICENSE",
+      "tarball": "https://registry.npmjs.org/rfs/-/rfs-10.0.0.tgz",
+      "bytes": 1077,
+      "sha256": "2454fbcb6b3c56f8487847d0959b3e97da89b213704f5fefdbfc4294e788d667",
+      "note": "RFS source in the CSS map is byte-identical to rfs@10.0.0/scss.scss.",
+      "integrity": "sha512-Iu0N8fGAHDE6NZSc+S1aaY9ClaqkOdko+NvAstUS5sxRnzUgV20Ak0cOsMEP/vyYdzM3DOUOPKXH4XhfzMthvw==",
+      "tarballSHA256": "63c63f7104190eeadddcd0958c43da1d5ddd4f867c749cb25f52a493346f715e"
+    },
+    {
+      "path": "licenses/normalize-LICENSE.txt",
+      "role": "license",
+      "package": "normalize.css",
+      "version": "8.0.1",
+      "source": "LICENSE.md",
+      "tarball": "https://registry.npmjs.org/normalize.css/-/normalize.css-8.0.1.tgz",
+      "bytes": 1098,
+      "sha256": "89a9a9ace8be9e79bdc962823479bf980e4a14777ebe51b37e669f658e6f25ef",
+      "note": "Upstream notice for Normalize-derived Bootstrap Reboot; not a separately loaded Normalize runtime or a claim that Reboot equals release 8.0.1.",
+      "integrity": "sha512-qizSNPO93t1YUuUhP22btGOo3chcvDFqFaj2TRybP0DMxkHOCTYwp3n34fel4a31ORXy4m1Xq0Gyqpb5m33qIg==",
+      "tarballSHA256": "5cc172e0d5d062bc2a1a4bf85443e2eb260d3720e16527a0c1ac03b642f1de39"
+    }
+  ],
+  "embedded": {
+    "popper": {
+      "version": "2.11.8",
+      "matchedMapSources": 55,
+      "upstreamLock": "https://github.com/twbs/bootstrap/blob/v5.3.2/package-lock.json"
+    },
+    "rfs": {
+      "version": "10.0.0",
+      "matchedSourceBytes": 10012
+    },
+    "normalize": "Bootstrap Reboot declares a Normalize.css MIT derivation; no independent Normalize runtime is shipped."
+  }
+}

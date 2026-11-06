@@ -1,3 +1,5 @@
+const {assetForURL,runtimeAssets}=require('../../helpers/vendor.cjs');
+const papaAsset=runtimeAssets.find(e=>e.package==='papaparse');
 const {test,runtime}=require('../../helpers/browser.cjs').suite();
 const {site,maintenance,snapshot,artifact,localAsset}=require('../../helpers/paths.cjs');
 const baseURL=()=>runtime.origin;
@@ -39,10 +41,11 @@ async function settle(p){await p.waitForFunction(()=>!document.querySelector('#s
 const pause=ms=>new Promise(r=>setTimeout(r,ms));
 async function sample(initial=good,{width=1280,theme='light',parser='normal'}={}){
  const control={response:initial,requests:0,held:[],hold:false};
- const context=await browser.newContext({viewport:{width,height:1000},colorScheme:theme});
+ const context=await browser.newContext({viewport:{width,height:1000},colorScheme:theme,expectedVendorFaults:parser==='normal'?[]:[papaAsset.path]});
  await context.route('**/*',async route=>{const u=new URL(route.request().url());
+  if(assetForURL(u.href,runtime.origin)?.path===papaAsset.path){if(parser==='missing')return route.abort();if(parser==='throws')return route.fulfill({body:'window.Papa={parse(){throw new Error("injected parse error")}}',contentType:'text/javascript'});}
   if(u.hostname==='127.0.0.1')return route.continue();
-  if(u.hostname==='cdn.jsdelivr.net'){const name=u.pathname.split('/').pop();if(name==='papaparse.min.js'&&parser==='missing')return route.abort();if(name==='papaparse.min.js'&&parser==='throws')return route.fulfill({body:'window.Papa={parse(){throw new Error("injected parse error")}}',contentType:'text/javascript'});return route.fulfill({path:localAsset(name),contentType:name.endsWith('.css')?'text/css':'text/javascript'})}
+
   if(u.hostname==='docs.google.com'){control.requests++;if(control.hold){const content=control.response;await new Promise(resolve=>control.held.push(resolve));try{return await route.fulfill({body:content,contentType:'text/csv',headers:{'access-control-allow-origin':'*'}})}catch{return}}if(control.response==='NETWORK_ERROR')return route.abort();if(control.response==='HTTP_ERROR')return route.fulfill({status:503,body:'Unavailable',headers:{'access-control-allow-origin':'*'}});return route.fulfill({body:control.response,contentType:'text/csv; charset=utf-8',headers:{'access-control-allow-origin':'*'}})}
   if(u.hostname==='img.youtube.com')return route.fulfill({path:localAsset('sample-thumbnail.jpg'),contentType:'image/jpeg'});
   return route.abort();

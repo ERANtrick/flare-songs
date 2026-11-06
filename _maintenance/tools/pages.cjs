@@ -22,6 +22,7 @@ function hashes(dir,root=dir,map={}){
 const a=build(baseline,'reference'),b=build(site,'candidate'),expected=hashes(a),actual=hashes(b);
 assert.deepEqual(actual,expected,'Pages output must match a real build containing only the public inputs');
 for(const name of Object.keys(actual))assert.ok(!/(^|\/)(?:_maintenance|node_modules|\.github|artifacts|tests|fixtures)(\/|$)|\.(?:csv|cjs|log|zip)$|package(?:-lock)?\.json$|Gemfile/.test(name),'Private output: '+name);
-for(const name of ['index.html','script.js','styles.css','favicon.ico','assets/icons/music-note-list.svg','assets/icons/play-fill.svg','assets/icons/shuffle.svg','licenses/bootstrap-icons-LICENSE.txt'])assert.equal(actual[name],crypto.createHash('sha256').update(fs.readFileSync(path.join(site,name))).digest('hex'),name);
+for(const name of require('../fixtures/public-files.json').filter(name=>!name.endsWith('.md')))assert.equal(actual[name],crypto.createHash('sha256').update(fs.readFileSync(path.join(site,name))).digest('hex'),name);
+for(const entry of require('../fixtures/vendor-manifest.json').files)assert.equal(actual[entry.path],entry.sha256,entry.path);
 fs.writeFileSync(path.join(out,'comparison.json'),JSON.stringify({passed:true,files:actual,publicInputs:require('../fixtures/public-files.json')},null,2)+'\n');
 console.log('Real GitHub Pages/Jekyll builds match: '+Object.keys(actual).length+' output files; maintenance leakage: 0. '+out);

@@ -52,10 +52,7 @@ async function contextWith(csv, options = {}) {
   await context.route('**/*', async route => {
     const url = new URL(route.request().url());
     if (url.hostname === '127.0.0.1') return route.continue();
-    if (url.hostname === 'cdn.jsdelivr.net') {
-      const name = url.pathname.split('/').pop();
-      return route.fulfill({ path: localAsset(name), contentType: name.endsWith('.css') ? 'text/css' : 'text/javascript' });
-    }
+
     if (url.hostname === 'docs.google.com') {
       if (options.failCSV) return route.abort('failed');
       return route.fulfill({ body: csv, contentType: 'text/csv; charset=utf-8', headers: {'access-control-allow-origin': '*'} });

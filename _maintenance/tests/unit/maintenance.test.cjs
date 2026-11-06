@@ -2,7 +2,8 @@ const {test}=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const {startServer}=require('../../helpers/server.cjs');
 const {site,maintenance,localAsset}=require('../../helpers/paths.cjs');
-const {classify,cdn,csvURL}=require('../../helpers/browser.cjs');
+const {classify,csvURL}=require('../../helpers/browser.cjs');
+const {assets,verifyFiles}=require('../../helpers/vendor.cjs');
 test('F07-U01 動的ポートの独立serverは対象checkoutとproject subpathを同じ内容で返す',async()=>{
  const a=await startServer(),b=await startServer();try{assert.notEqual(a.origin,b.origin);for(const name of ['index.html','script.js','styles.css','assets/icons/shuffle.svg'])for(const prefix of ['/','/flare-songs/']){
   const r=await fetch(a.origin+prefix+name);assert.equal(r.status,200);assert.deepEqual(Buffer.from(await r.arrayBuffer()),fs.readFileSync(path.join(site,name)));
@@ -13,12 +14,12 @@ test('F07-U02 保守・dotfile・traversal・未知ファイルをpreviewから�
  assert.equal((await fetch(s.origin+'/',{method:'POST'})).status,405);
  }finally{await s.close();}
 });
-test('F07-U03 未登録CDN版・CSVホスト偽装・未知の外部通信を拒否',()=>{
- const origin='http://127.0.0.1:12345';for(const value of ['https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css','https://docs.google.com/other.csv','https://docs.google.com.evil.test/data','https://example.org/a'])assert.throws(()=>classify(value,origin),/Unexpected external/);
- for(const value of cdn.keys())assert.equal(classify(value,origin),'cdn');assert.equal(classify(csvURL,origin),'csv');
+test('F07-U03 CDN・不明なlocal vendor・CSVホスト偽装・未知の外部通信を拒否',()=>{
+ const origin='http://127.0.0.1:12345';for(const value of ['https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css','https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css','https://docs.google.com/other.csv','https://docs.google.com.evil.test/data','https://example.org/a',origin+'/assets/vendor/bootstrap-5.3.3/bootstrap.min.css',origin+'/assets/vendor/unknown.js'])assert.throws(()=>classify(value,origin),/Unexpected/);
+ for(const value of assets.keys())assert.equal(classify(origin+'/flare-songs/'+value,origin),'vendor');assert.equal(classify(csvURL,origin),'csv');
 });
-test('F07-U04 CDN完全URLと依存版・配布物が対応し、未知assetへfallbackしない',()=>{
- for(const [url,file]of cdn){assert.ok(url.includes('@5.3.2/'));assert(fs.statSync(file).isFile());}
+test('F07-U04 local vendorの完全パス・byte/hashと固定npm配布物が対応し、未知assetへfallbackしない',()=>{
+ verifyFiles();for(const value of assets.keys())assert.ok(value.includes('-5.3.2/'));
  assert.throws(()=>localAsset('unknown.js'),/Unregistered/);
 });
 test('F07-U05 固定CSVのバイト列・SHA-256・期待件数をmanifestで保護',()=>{
